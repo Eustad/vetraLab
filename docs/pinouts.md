@@ -275,6 +275,107 @@ Generada a partir de las definiciones internas del simulador (`Lab.IC`, `Lab.MCU
 | 15 | QA |
 | 16 | VCC |
 
+### 74HC138 · decodificador 3 a 8
+
+| Pata | Nombre |
+|---:|---|
+| 1 | A |
+| 2 | B |
+| 3 | C |
+| 4 | /G2A |
+| 5 | /G2B |
+| 6 | G1 |
+| 7 | /Y7 |
+| 8 | GND |
+| 9 | /Y6 |
+| 10 | /Y5 |
+| 11 | /Y4 |
+| 12 | /Y3 |
+| 13 | /Y2 |
+| 14 | /Y1 |
+| 15 | /Y0 |
+| 16 | VCC |
+
+### 74HC151 · multiplexor 8 a 1
+
+| Pata | Nombre |
+|---:|---|
+| 1 | D3 |
+| 2 | D2 |
+| 3 | D1 |
+| 4 | D0 |
+| 5 | Y |
+| 6 | /W |
+| 7 | /G |
+| 8 | GND |
+| 9 | C |
+| 10 | B |
+| 11 | A |
+| 12 | D7 |
+| 13 | D6 |
+| 14 | D5 |
+| 15 | D4 |
+| 16 | VCC |
+
+### TL081 · amplificador operacional JFET (DIP-8)
+
+| Pata | Nombre |
+|---:|---|
+| 1 | NULL |
+| 2 | IN− |
+| 3 | IN+ |
+| 4 | V− |
+| 5 | NULL |
+| 6 | OUT |
+| 7 | V+ |
+| 8 | NC |
+
+### TL082 · 2 amplificadores JFET (DIP-8)
+
+| Pata | Nombre |
+|---:|---|
+| 1 | OUT A |
+| 2 | IN− A |
+| 3 | IN+ A |
+| 4 | V− |
+| 5 | IN+ B |
+| 6 | IN− B |
+| 7 | OUT B |
+| 8 | V+ |
+
+### LM386 · amplificador de audio (DIP-8)
+
+| Pata | Nombre |
+|---:|---|
+| 1 | GAIN |
+| 2 | IN− |
+| 3 | IN+ |
+| 4 | GND |
+| 5 | VOUT |
+| 6 | VS |
+| 7 | BYPASS |
+| 8 | GAIN |
+
+### PC817 · optoacoplador (DIP-4)
+
+| Pata | Nombre |
+|---:|---|
+| 1 | A |
+| 2 | K |
+| 3 | E |
+| 4 | C |
+
+### 4N25 · optoacoplador (DIP-6)
+
+| Pata | Nombre |
+|---:|---|
+| 1 | A |
+| 2 | K |
+| 3 | NC |
+| 4 | E |
+| 5 | C |
+| 6 | B |
+
 ### Bloques de Proteus → patas físicas
 
 | Integrado | Bloque A | Bloque B | Bloque C | Bloque D | Alimentación |
@@ -468,6 +569,19 @@ Nombres de pin del NE555 en Proteus: TR = TRIG (2), Q = OUT (3), R = RESET (4), 
 - **COM**: común del contacto
 - **NO**: normalmente abierto
 - **NC**: normalmente cerrado
+
+### Transformador 120 V → 12-0-12 V con toma central
+
+- **A**: secundario, extremo A
+- **CT**: toma central (0 V)
+- **B**: secundario, extremo B
+
+### Puente rectificador (DB107)
+
+- **+**: salida +
+- **~1**: entrada de alterna
+- **~2**: entrada de alterna
+- **-**: salida −
 
 ### Multímetro digital UNI-T UT53
 

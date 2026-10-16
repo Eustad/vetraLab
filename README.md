@@ -5,6 +5,13 @@ Simulador de circuitos electrónicos en 3D en un solo archivo HTML (three.js + m
 ## Abrir
 Abre `index.html` en Chrome o Edge (necesita internet la primera vez para cargar three.js y las bibliotecas CAD desde CDN).
 
+## Versión 21.1
+- Pulsador momentáneo real: queda presionado mientras mantienes el clic o el dedo (antes hacía un pulso de 220 ms o se soltaba al mover el puntero); el cuerpo y las patas siguen sirviendo para moverlo.
+- Transformador 120 V → 12-0-12 V con toma central (6 a 24 V por mitad, 50/60 Hz): onda completa con 2 diodos, puente o fuente simétrica ±12 V.
+- Puentes rectificadores 2W10 (redondo, 2 A) y KBP206 (en línea, 2 A) además del DB107; mapeo desde Proteus.
+- Módulo relé con bobina de 12 V (SRD-12VDC-SL-C, 400 Ω, actúa sobre 8,4 V) además del de 5 V.
+- Ya existían y están en el catálogo: LM317, 7812, 7912, LM741, TL081/TL082, LM358, LM386, 74HC595/138/151, PC817 y 4N25.
+
 ## Versión 21
 - Memoria de la GPU: limpieza profunda de geometrías, materiales y todas las texturas (mapas de color, relieve, emisivo…) al borrar piezas, cambiar de práctica, crear un proyecto nuevo o importar.
 - Bucle de render: se detiene con la pestaña oculta (sin render ni solver MNA) y baja a ≈18 FPS cuando el editor de código está maximizado (la simulación sigue igual).

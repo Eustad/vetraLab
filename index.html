@@ -1557,6 +1557,7 @@ const PARTS = {
   oled:      { kind:'bench', prefix:'OLED', nombre:'Pantalla OLED 0,96" 128×64 I2C (SSD1306)', w:27, h:8, d:28, pins:['GND', 'VCC', 'SCL', 'SDA'], pinNames:{ GND:'tierra', VCC:'3,3 a 5 V', SCL:'reloj I2C', SDA:'datos I2C (dirección 0x3C)' } },
   supply:    { kind:'bench', prefix:'PS',  nombre:'Fuente de alimentación DC', w:84, h:44, d:58, pins:['+','-','gnd'], pinNames:{ '+':'salida +', '-':'salida −', gnd:'tierra' } },
   fgen:      { kind:'bench', prefix:'FG',  nombre:'Generador de señales', w:92, h:38, d:58, pins:['out','gnd'], pinNames:{ out:'salida', gnd:'tierra' } },
+  trafo:     { kind:'bench', prefix:'TR', nombre:'Transformador 120 V → 12-0-12 V con toma central', w:84, h:64, d:72, pins:['A', 'CT', 'B'], pinNames:{ A:'secundario, extremo A', CT:'toma central (0 V)', B:'secundario, extremo B' } },
   scope4:    { kind:'bench', prefix:'OSC', nombre:'Osciloscopio Rigol DS1054Z (4 canales)', w:314, h:167, d:124, pins:['ch1','ch2','ch3','ch4','gnd'], pinNames:{ ch1:'canal 1 (BNC)', ch2:'canal 2 (BNC)', ch3:'canal 3 (BNC)', ch4:'canal 4 (BNC)', gnd:'tierra de las puntas' } },
   scope:     { kind:'bench', prefix:'OSC', nombre:'Osciloscopio de 2 canales', w:124, h:70, d:72, pins:['ch1','ch2','gnd'], pinNames:{ ch1:'canal 1', ch2:'canal 2', gnd:'tierra' } }
 };
@@ -1586,6 +1587,7 @@ const TERMS = {
   supply: { gnd:{ x:8, y:10 }, '-':{ x:20, y:10 }, '+':{ x:32, y:10 } },
   fgen:   { out:{ x:26, y:9 }, gnd:{ x:38, y:9 } },
   scope:  { ch1:{ x:24, y:12 }, ch2:{ x:38, y:12 }, gnd:{ x:52, y:12 } },
+  trafo:  { A:{ x:-14, y:13 }, CT:{ x:0, y:13 }, B:{ x:14, y:13 } },
   scope4: { ch1:{ x:16.3, y:26.9, z:76.6, up:true, r:5.5, out:[0, 0, 1], exit:14 }, ch2:{ x:52, y:26.9, z:76.6, up:true, r:5.5, out:[0, 0, 1], exit:14 }, ch3:{ x:87, y:26.9, z:76.6, up:true, r:5.5, out:[0, 0, 1], exit:14 }, ch4:{ x:120.5, y:26.9, z:76.6, up:true, r:5.5, out:[0, 0, 1], exit:14 }, gnd:{ x:147.6, y:25.6, z:69.2, up:true, r:3.6, out:[0.35, -0.2, 1], exit:10 } },
   motor:     { '+':{ x:19.2, y:7.6, z:6, up:true, r:1.2 }, '-':{ x:19.2, y:7.6, z:-6, up:true, r:1.2 } },
   gearmotor: { '+':{ x:34.6, y:20.2, z:4.6, up:true, r:1.3 }, '-':{ x:34.6, y:20.2, z:-4.6, up:true, r:1.3 } },
@@ -1622,7 +1624,7 @@ const TERMS = {
   Object.values(TERMS.hcsr04).forEach(t => { t.out = [0, 0, -1]; t.exit = 6; });
   Object.values(TERMS.tcrt).forEach(t => { t.exit = 3; });
 })();
-const BENCH_HOME = { scope4:{ x:250, z:-190 }, dmm:{ x:260, z:110 }, lprobe:{ x:-250, z:150 }, keypad:{ x:-230, z:-10 }, oled:{ x:150, z:-20 }, batteryPack:{ x:-200, z:140 }, joystick:{ x:-150, z:60 }, relay:{ x:130, z:95 }, chasis2wd:{ x:-330, z:430 }, chasisbal:{ x:-250, z:250 }, brazo3d:{ x:300, z:250 }, portapilas:{ x:-200, z:200 }, tcrt:{ x:-20, z:95 }, hcsr04:{ x:-20, z:95 }, mpu6050:{ x:-20, z:95 }, supply:{ x:-95, z:-82 }, fgen:{ x:5, z:-82 }, scope:{ x:125, z:-88 }, arduino:{ x:-100, z:20 },
+const BENCH_HOME = { trafo:{ x:-235, z:-150 }, scope4:{ x:250, z:-190 }, dmm:{ x:260, z:110 }, lprobe:{ x:-250, z:150 }, keypad:{ x:-230, z:-10 }, oled:{ x:150, z:-20 }, batteryPack:{ x:-200, z:140 }, joystick:{ x:-150, z:60 }, relay:{ x:130, z:95 }, chasis2wd:{ x:-330, z:430 }, chasisbal:{ x:-250, z:250 }, brazo3d:{ x:300, z:250 }, portapilas:{ x:-200, z:200 }, tcrt:{ x:-20, z:95 }, hcsr04:{ x:-20, z:95 }, mpu6050:{ x:-20, z:95 }, supply:{ x:-95, z:-82 }, fgen:{ x:5, z:-82 }, scope:{ x:125, z:-88 }, arduino:{ x:-100, z:20 },
   uln_mod:{ x:60, z:45 }, stepkit:{ x:40, z:-72 }, l298n:{ x:70, z:50 }, motor:{ x:95, z:30 }, gearmotor:{ x:110, z:35 }, stepper:{ x:95, z:30 }, nema17:{ x:95, z:35 }, servo:{ x:90, z:25 } };
 const TB_LIST = [1e-5, 2e-5, 5e-5, 1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2, 2e-2, 5e-2, 0.1, 0.2, 0.5, 1];
 const VD_LIST = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10];
@@ -1764,7 +1766,7 @@ function defaultParams(type) {
     case 'ldr': return { lux:50, R:ldrR(50) };
     case 'batteryPack': return { V:7.4, on:true };
     case 'joystick': return { R:10000, x:0.5, y:0.5, pressed:false };
-    case 'relay': return { low:false };
+    case 'relay': return { low:false, coil:5 };
     case 'portapilas': return { celdas:4, on:true };
     case 'hcsr04': return { auto:true, dist:50 };
     case 'mpu6050': return { auto:true, pitch:0 };
@@ -1778,6 +1780,7 @@ function defaultParams(type) {
     case 'supply': return { V:9, I:1, on:true, link:true, dual:false };
     case 'fgen': return { wave:'sine', f:1000, vpp:4, off:0, duty:50, on:true };
     case 'scope': return { ch:[{ on:true, vdiv:2, pos:0 }, { on:true, vdiv:2, pos:0 }], tb:1e-3, trig:{ src:0, slope:1, level:0, mode:'auto' }, run:true, xy:false };
+    case 'trafo': return { V:12, f:60, on:true };
     case 'scope4': return { ch:[{ on:true, vdiv:2, pos:2 }, { on:true, vdiv:2, pos:0.5 }, { on:true, vdiv:2, pos:-1 }, { on:true, vdiv:2, pos:-2.5 }], tb:1e-3, trig:{ src:0, slope:1, level:0, mode:'auto' }, run:true, xy:false, sel:0 };
     case 'mcu': return { chip:'esp32', code:'' };
     case 'seg7': return { model:'1cc', color:'rojo' };
@@ -4215,7 +4218,7 @@ class Sim {
         case 'lm35': { const el = add({ id:c.id, type:'V', vset:0, vfun:() => (+c.p.T || 0) * 0.01, ilim:0.02, sense:true, cond:() => !!(el.s && el.s.pwOk), ks:[pk.VOUT, pk.GND, pk.VCC] }); break; }
         case 'ntc': { const T = (+c.p.T || 25) + 273.15; c.p.R = (+c.p.R25 || 10000) * Math.exp((+c.p.B || 3950) * (1 / T - 1 / 298.15)); add({ id:c.id, type:'R', ks:[pk['1'], pk['2']] }); break; }
         case 'rgbled': [['R', 'rojo'], ['G', 'verde'], ['B', 'azul']].forEach(q => add({ id:c.id + '/' + q[0], type:'D', led:true, spec:SPEC.LED, dt:LED_TYPES[q[1]], ks:[pk[q[0]], pk.K] })); break;
-        case 'bridge': { const dt = DIODES['1N4007']; [['~1', '+'], ['~2', '+'], ['-', '~1'], ['-', '~2']].forEach((q, i) => add({ id:c.id + '/d' + i, type:'D', dt, spec:SPEC.D, ks:[pk[q[0]], pk[q[1]]] })); break; }
+        case 'bridge': { const dt = DIODES['1N4007'], bsp = c.p.model === 'KBP206' ? Object.assign({}, SPEC.D, { Rth:38 }) : c.p.model === '2W10' ? Object.assign({}, SPEC.D, { Rth:50 }) : SPEC.D; [['~1', '+'], ['~2', '+'], ['-', '~1'], ['-', '~2']].forEach((q, i) => add({ id:c.id + '/d' + i, type:'D', dt, spec:bsp, ks:[pk[q[0]], pk[q[1]]] })); break; }
         case 'spdt': add({ id:c.id + '/a', type:'SW', sw:0, ks:[pk.C, pk['1']] }); add({ id:c.id + '/b', type:'SW', sw:1, ks:[pk.C, pk['2']] }); break;
         case 'bargraph': for (let k = 1; k <= 10; k++) add({ id:c.id + '/' + k, type:'D', led:true, spec:SPEC.LED, ks:[pk[String(k)], pk[String(21 - k)]] }); break;
         case 'keypad': for (let r = 0; r < 4; r++) for (let k = 0; k < 4; k++) add({ id:c.id + '/' + r + k, type:'SW', sw:r * 4 + k, ks:[termKey(c.id, 'R' + (r + 1)), termKey(c.id, 'C' + (k + 1))] }); break;
@@ -4296,6 +4299,7 @@ class Sim {
         case 'hcsr04': add({ id:c.id, type:'HCSR', ks:PARTS.hcsr04.pins.map(q => termKey(c.id, q)) }); break;
         case 'mpu6050': add({ id:c.id, type:'MPU', ks:PARTS.mpu6050.pins.map(q => termKey(c.id, q)) }); break;
         case 'scope': add({ id:c.id, type:'SCOPE', ks:[termKey(c.id, 'ch1'), termKey(c.id, 'ch2')] }); break;
+        case 'trafo': hasSrc = true; ['a', 'b'].forEach((k, i) => add({ id:c.id + '/' + k, type:'XF', ph:i ? Math.PI : 0, ks:[termKey(c.id, i ? 'B' : 'A'), termKey(c.id, 'CT')] })); break;
         case 'scope4': add({ id:c.id, type:'SCOPE', ks:['ch1', 'ch2', 'ch3', 'ch4'].map(q => termKey(c.id, q)) }); break;
       }
     });
@@ -4335,6 +4339,7 @@ class Sim {
     let h = 1e-3;
     for (const e of this.els) {
       if (e.type === 'G' && e.c.p.on !== false) h = Math.min(h, 1 / (e.c.p.f * 64));
+      if (e.type === 'XF' && e.c.p.on !== false) h = Math.min(h, 1 / ((+e.c.p.f || 60) * 96));
       if (e.type === 'SCOPE') h = Math.min(h, e.c.p.tb / 20);
       if (e.type === 'IC' && e.d.kind === 'tl494' && e.s.pw) h = Math.min(h, 1 / ((e.s.fest || 40000) * 40));
       if (e.type === 'IC' && e.d.kind === '555' && e.s.fest) h = Math.min(h, 1 / (e.s.fest * 60));
@@ -4611,7 +4616,7 @@ class Sim {
         case 'RP': sG(G0, n, e.ia, e.ib, 1 / this.potR(e)); break;
         case 'W': if (!s.failed && e.ia !== e.ib) sG(G0, n, e.ia, e.ib, 1 / SPEC.W.Rw); break;
         case 'SW': if (swOn(e)) sG(G0, n, e.ia, e.ib, 1 / 0.05); break;
-        case 'RLY': { const x = e.ix; if (c.p.low) sG(G0, n, x[2], x[0], 1 / 10000); else sG(G0, n, x[2], x[1], 1 / 10000); sG(G0, n, x[0], x[1], s.on ? 1 / 70 : 1 / 20000); break; }
+        case 'RLY': { const x = e.ix; if (c.p.low) sG(G0, n, x[2], x[0], 1 / 10000); else sG(G0, n, x[2], x[1], 1 / 10000); sG(G0, n, x[0], x[1], s.on ? 1 / (c.p.coil == 12 ? 400 : 70) : 1 / 20000); break; }
         case 'C': if (!s.failed) { const geq = c.p.C / h; e.geq = geq; sG(G0, n, e.ia, e.ib, geq); sI(B0, e.ia, e.ib, -geq * s.vprev); } break;
         case 'SCOPE': for (const q of e.ix) sG(G0, n, q, -1, 1e-7); break;
         case 'L': { const kl = c.p.L / h, geq = 1 / (Math.max(c.p.R, 1e-3) + kl); e.geq = geq; e.ieq = kl * (s.iL || 0) * geq; if (!s.failed) { sG(G0, n, e.ia, e.ib, geq); sI(B0, e.ia, e.ib, e.ieq); } break; }
@@ -4623,6 +4628,7 @@ class Sim {
         }
         case 'IC': if (!s.failed) this.stampIC(e, G0, n, B0); break;
         case 'LINK': sG(G0, n, e.ia, e.ib, 100); break;
+        case 'XF': { const on = c.p.on !== false, vs = on ? Math.SQRT2 * (+c.p.V || 12) * Math.sin(2 * Math.PI * (+c.p.f || 60) * t + e.ph) : 0; e.vs = vs; const g = 1 / 0.6; sG(G0, n, e.ia, e.ib, g); sI(B0, e.ib, e.ia, vs * g); sG(G0, n, e.ib, -1, 1e-9); break; }
         case 'MOT': { const m = e.m, g = 1 / m.R; e.emf = m.ke * (s.w || 0); if (!s.failed) { sG(G0, n, e.ia, e.ib, g); sI(B0, e.ib, e.ia, e.emf * g); } break; }
         case 'STEP':
           if (e.bip) { sG(G0, n, e.ix[0], e.ix[1], 1 / 30); sG(G0, n, e.ix[2], e.ix[3], 1 / 30); }
@@ -4728,6 +4734,7 @@ class Sim {
           continue;
         }
         case 'G': i = c.p.on !== false ? (e.vs - vab) / SPEC.G.Rout : 0; pw = vab * i; break;
+        case 'XF': i = ((e.vs || 0) - vab) / 0.6; pw = vab * i; break;
         case 'MOS': {
           const vgs = V(e.ix[1]) - V(e.ix[2]), vds = V(e.ix[0]) - V(e.ix[2]), sw = vds < 0, r = s.failed ? { id:0 } : mosId(e.m, sw ? vgs - vds : vgs, Math.abs(vds)), id = sw ? -r.id : r.id, P = Math.max(0, vds * id);
           this.res[e.id] = { v:vds, i:id, vgs, p:P }; s.pAcc += P * h;
@@ -5048,9 +5055,9 @@ class Sim {
   /* relé: la bobina se energiza con VCC presente y la entrada activa (alto o bajo según el módulo) */
   rlyPost(e) {
     const s = e.s, x = e.ix, V = i => i === undefined || i < 0 ? 0 : this.v[i], vg = V(x[1]), vcc = V(x[0]) - vg, vin = V(x[2]) - vg;
-    const act = e.c.p.low ? vin < 1.5 : vin > 2.5, on = vcc > 3.5 && act;
+    const act = e.c.p.low ? vin < 1.5 : vin > 2.5, k12 = e.c.p.coil == 12, on = vcc > (k12 ? 8.4 : 3.5) && act, rc = k12 ? 400 : 70;
     if (on !== !!s.on) { s.on = on; s.clicks = (s.clicks || 0) + 1; }
-    this.res[e.id] = { v:vcc, i:on ? vcc / 70 : vcc / 20000, p:on ? vcc * vcc / 70 : 0, on, vin };
+    this.res[e.id] = { v:vcc, i:on ? vcc / rc : vcc / 20000, p:on ? vcc * vcc / rc : 0, on, vin, coil:k12 ? 12 : 5 };
   }
   /* LM7805: entrada invertida o por encima de 35 V lo destruye */
   regCheck(e, h) {
@@ -7680,7 +7687,9 @@ function sanitize(obj) {
       case 'ldr': d.lux = clamp(num(q.lux, 50), 0, 100); d.R = Lab.ldrR(d.lux); break;
       case 'batteryPack': d.V = [3, 5, 7.4, 9, 12].includes(+q.V) ? +q.V : 7.4; d.on = q.on !== false; break;
       case 'joystick': d.x = clamp(num(q.x, 0.5), 0, 1); d.y = clamp(num(q.y, 0.5), 0, 1); d.pressed = !!q.pressed; break;
-      case 'relay': d.low = !!q.low; break;
+      case 'relay': d.low = !!q.low; d.coil = +q.coil === 12 ? 12 : 5; break;
+      case 'trafo': d.V = [6, 9, 12, 15, 18, 24].includes(+q.V) ? +q.V : 12; d.f = +q.f === 50 ? 50 : 60; d.on = q.on !== false; break;
+      case 'bridge': d.model = ['DB107', '2W10', 'KBP206'].includes(q.model) ? q.model : 'DB107'; break;
       case 'portapilas': d.celdas = [4, 6, 8].includes(q.celdas) ? q.celdas : 4; d.on = q.on !== false; break;
       case 'tcrt': d.auto = q.auto !== false; d.line = typeof q.line === 'number' ? clamp(q.line, -40, 40) : null; break;
       case 'hcsr04': d.auto = q.auto !== false; d.dist = clamp(num(q.dist, 50), 2, 450); break;
@@ -8715,6 +8724,7 @@ function renderInspector() {
     }
   }
   if (c.type === 'dmm' || c.type === 'lprobe') h += instHtml(c);
+  h += x21Html(c);
   if (canRotate(c)) h += benchRotHtml(c);
   h += '<div class="btns">' + (P.kind === 'board' ? '<button class="btn" id="b-flip">Girar 180° <kbd>R</kbd></button>' : '') + '<button class="btn" id="b-replace" title="Cambiar por otra pieza de la biblioteca conservando los cables">🔄 Reemplazar…</button><button class="btn" id="b-focus">Enfocar <kbd>F</kbd></button><button class="btn" id="b-repair" hidden>Reemplazar por uno nuevo</button><button class="btn danger" id="b-del">Eliminar</button></div>';
   box.innerHTML = h;
@@ -8736,6 +8746,7 @@ function bindInspector(sel) {
   if (sel.kind === 'wire') { $$('[data-wst]').forEach(b => b.addEventListener('click', () => { pushUndo(); sel.w.style = b.dataset.wst === 'arco' ? undefined : b.dataset.wst; commit(); })); $$('.sw').forEach(b => b.addEventListener('click', () => { pushUndo(); sel.w.color = b.dataset.color; commit(); })); return; }
   const c = sel.c, p = c.p;
   if (c.type === 'dmm' || c.type === 'lprobe') instBind(c);
+  x21Bind(c);
   if (canRotate(c)) bindRot(c);
   const setP = fn => { pushUndo(); fn(); commit(); };
   const live = (id, apply, txt) => {
@@ -8870,6 +8881,7 @@ function updateReadouts() {
   if (sel.kind === 'comp') {
     const c = sel.c, rr = k => S.sim.res[c.id + k] || null;
     if (c.type === 'dmm' || c.type === 'lprobe') instReadouts(c, set);
+    x21Read(c, set);
     if (c.type === 'chasis2wd' || c.type === 'chasisbal') { const a = rr('/mL'), b = rr('/mR'); set('i-ml', a ? fmt(a.rpm || 0, 0) + ' rpm · ' + fmt(a.v || 0, 1) + ' V' : 'externo o sin conectar'); set('i-mr', b ? fmt(b.rpm || 0, 0) + ' rpm · ' + fmt(b.v || 0, 1) + ' V' : 'externo o sin conectar'); }
     if (c.type === 'brazo3d') [1, 2, 3, 4].forEach(k => { const q = rr('/s' + k); set('i-j' + k, q ? fmt(q.ang === undefined ? 90 : q.ang, 0) + '°' + (q.pw ? ' · ' + fmt(q.pw * 1e6, 0) + ' µs' : ' · sin pulsos') : 'servo externo'); });
     if (c.type === 'buzzer') { const st = buzzState(c, r); set('i-bz', st.on ? 'Sonando · ' + fmt(st.f, 0) + ' Hz' : 'En silencio'); }
@@ -12237,7 +12249,8 @@ const CAD_WRAP = {
     /* terminales a 6,5 × 4,5 mm: girado 90° deja el paso de 4,5 mm sobre las columnas de la placa */
     const g = new THREE.Group(); m.rotation.y = Math.PI / 2; g.add(m);
     const act = findMesh(m, /^actuador/), y0 = act ? act.position.y : 0;
-    ctlOn(m, btnCtl(c, p => { if (p.latch) p.pressed = !p.pressed; else { p.pressed = true; setTimeout(() => { p.pressed = false; }, 220); } }, p => p.pressed ? 'Pulsador presionado' : 'Pulsador suelto'));
+    /* el pulsador CAD se mantiene presionado mientras dure el clic (lo gestiona el manejador de BTN_HOLD) */
+    m.traverse(q => { if (q.isMesh) q.userData.btnCap = true; });
     return { group:g, update:() => { if (act) act.position.y = y0 - (c.p.pressed ? 0.28 : 0); } };
   },
   seg7(c, m) {
@@ -13559,6 +13572,166 @@ function applyTips(root) { Object.keys(TIPS).forEach(sel => (root || document).q
 applyTips();
 const renderInspector20 = renderInspector;
 renderInspector = function () { const r = renderInspector20.apply(this, arguments); try { applyTips($('#inspector')); } catch (err) { /* sin inspector */ } return r; };
+
+/* ================= v21.1 · pulsador momentáneo: queda presionado MIENTRAS mantienes el clic o el dedo ================= */
+/* antes, el más mínimo movimiento del puntero iniciaba el arrastre de la pieza y la soltaba (un pulso). Ahora el capuchón
+   solo presiona; la pieza se mueve arrastrándola por el cuerpo o las patas. */
+const buildButton20 = BUILD.button;
+BUILD.button = function (c) {
+  const o = buildButton20(c);
+  const hit = new THREE.Mesh(new THREE.CylinderGeometry(3.3, 3.3, 3.2, 16), new THREE.MeshBasicMaterial()); hit.visible = false; hit.position.y = 5.7; hit.userData.btnCap = true; o.group.add(hit);
+  o.group.traverse(m => { if (m.isMesh && m.geometry && m.geometry.parameters && m.geometry.parameters.radiusTop === 1.8) m.userData.btnCap = true; });
+  return o;
+};
+let BTN_HOLD = null;
+window.addEventListener('pointerdown', e => {
+  if (e.target !== canvas || e.button > 0 || S.mode === 'cable' || SPACE.held || PROBE.id) return;
+  setRay(e); const h = ray.intersectObjects(pickables, false)[0];
+  if (!h || !h.object.userData.btnCap) return;
+  const c = findComp(h.object.userData.compId); if (!c || c.type !== 'button') return;
+  e.stopImmediatePropagation(); e.preventDefault();
+  selectItem({ type:'comp', id:c.id });
+  if (c.p.latch) c.p.pressed = !c.p.pressed; else c.p.pressed = true;
+  BTN_HOLD = { c, id:e.pointerId }; controls.enabled = false; canvas.style.cursor = 'pointer'; updateReadouts();
+}, true);
+function btnRelease(e) {
+  if (BTN_HOLD && (!e || e.pointerId === undefined || e.pointerId === BTN_HOLD.id)) { if (!BTN_HOLD.c.p.latch) BTN_HOLD.c.p.pressed = false; BTN_HOLD = null; controls.enabled = true; canvas.style.cursor = 'default'; updateReadouts(); scheduleSave(); return; }
+  /* botón «Mantener presionado» del inspector: si el inspector se redibujó mientras lo sostenías, se suelta al levantar el dedo */
+  if (S.project) S.project.components.forEach(c => { if (c.type === 'button' && !c.p.latch && c.p.pressed && (!BTN_HOLD || BTN_HOLD.c !== c)) { c.p.pressed = false; updateReadouts(); } });
+}
+window.addEventListener('pointerup', btnRelease, true);
+window.addEventListener('pointercancel', btnRelease, true);
+window.addEventListener('blur', () => btnRelease());
+window.addEventListener('pointermove', e => {
+  if (BTN_HOLD || e.buttons || e.target !== canvas) return;
+  setRay(e); const h = ray.intersectObjects(pickables, false)[0];
+  if (h && h.object.userData.btnCap) { canvas.style.cursor = 'pointer'; canvas.title = 'Pulsador: mantén presionado el clic para cerrar el contacto'; } else if (canvas.title) canvas.title = '';
+});
+
+/* ================= v21.1 · transformador 120 V → 12-0-12 V con toma central ================= */
+/* CAD_SPEC (mm): núcleo EI-66 de chapas de 0,5 mm (66 × 55 × 32), carrete con cinta aislante, escuadras de montaje,
+   cable de red con enchufe y regleta frontal de 3 bornes A · CT · B */
+const TRAFO_SPEC = { nucleo:[66, 55, 32], carrete:[38, 41, 9], base:[84, 2, 72], regleta:[48, 15, 4], bornes:{ x:[-14, 0, 14], y:13 } };
+function trafoLamTex() {
+  const cv = document.createElement('canvas'); cv.width = 64; cv.height = 256; const q = cv.getContext('2d');
+  for (let y = 0; y < 256; y += 4) { q.fillStyle = (y / 4) % 2 ? '#4b4f56' : '#5d626a'; q.fillRect(0, y, 64, 4); q.fillStyle = 'rgba(0,0,0,.35)'; q.fillRect(0, y + 3, 64, 1); }
+  return texOf(cv);
+}
+function buildTrafo(c) {
+  const P = PARTS.trafo, g = new THREE.Group(), S_ = TRAFO_SPEC, zc = -6;
+  const steel = M('#7d8189', 0.38, 0.85), lam = new THREE.MeshStandardMaterial({ map:trafoLamTex(), roughness:0.55, metalness:0.6 });
+  /* base de chapa con ranuras */
+  const base = box(S_.base[0], S_.base[1], S_.base[2], steel); base.position.y = 1; g.add(base);
+  [[-36, -28], [36, -28], [-36, 26], [36, 26]].forEach(([x, z]) => { const s = box(7, 0.4, 3.2, M('#2a2c30', 0.8)); s.position.set(x, 2.05, z); g.add(s); });
+  /* núcleo laminado: las chapas se ven de canto en las caras laterales */
+  const core = new THREE.Mesh(new THREE.BoxGeometry(S_.nucleo[0], S_.nucleo[1], S_.nucleo[2]), [steel, steel, steel, steel, lam, lam]);
+  core.position.set(0, 2 + S_.nucleo[1] / 2, zc); core.castShadow = true; g.add(core);
+  /* escuadras de sujeción arriba y abajo */
+  [2 + 4, 2 + S_.nucleo[1] - 4].forEach(y => [-1, 1].forEach(s => { const b = box(S_.nucleo[0] + 4, 8, 1.4, steel); b.position.set(0, y, zc + s * (S_.nucleo[2] / 2 + 0.7)); g.add(b); }));
+  [-1, 1].forEach(s => { const r = cyl(1.6, S_.nucleo[2] + 6, M('#c9ccd1', 0.3, 0.9), 12); r.rotation.x = Math.PI / 2; r.position.set(s * 28, 2 + S_.nucleo[1] - 4, zc); g.add(r); });
+  /* carrete: cinta amarilla delante y detrás del núcleo, con etiqueta */
+  const tape = M('#e2be3c', 0.62);
+  [-1, 1].forEach(s => { const w = new THREE.Mesh(new THREE.BoxGeometry(S_.carrete[0], S_.carrete[1], S_.carrete[2]), tape); w.position.set(0, 2 + S_.nucleo[1] / 2, zc + s * (S_.nucleo[2] / 2 + S_.carrete[2] / 2)); w.castShadow = true; g.add(w); });
+  const lblTxt = ['120 V ~ ' + (c.p.f || 60) + ' Hz', (c.p.V || 12) + '-0-' + (c.p.V || 12) + ' V  1 A'], lbl = new THREE.Mesh(new THREE.PlaneGeometry(30, 14), new THREE.MeshStandardMaterial({ map:labelTex(lblTxt, 300, 140, '#1c1d20', '#f4f1e6', 34), roughness:0.7 }));
+  lbl.position.set(0, 2 + S_.nucleo[1] / 2 + 4, zc + S_.nucleo[2] / 2 + S_.carrete[2] + 0.05); g.add(lbl);
+  /* cable de red y enchufe detrás */
+  const cord = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V3(-8, 2 + 30, zc - 21), V3(-12, 14, zc - 30), V3(-20, 4, -44), V3(-30, 4, -60)]), 30, 1.6, 8), M('#151517', 0.6)); g.add(cord);
+  const plug = box(13, 8, 16, M('#111214', 0.55)); plug.position.set(-33, 5, -66); g.add(plug);
+  [-3, 3].forEach(x => { const pr = box(1.6, 5, 8, M('#d9dce0', 0.25, 0.9)); pr.position.set(-33 + x, 5, -78); g.add(pr); });
+  /* regleta frontal con los 3 bornes y los cables del secundario (amarillo, negro, amarillo) */
+  const strip = box(S_.regleta[0], S_.regleta[1], S_.regleta[2], M('#2b2d31', 0.5)); strip.position.set(0, S_.bornes.y, P.d / 2 - 2); g.add(strip);
+  const post = box(3, 13, 6, M('#2b2d31', 0.5)); post.position.set(0, 7.5, P.d / 2 - 6); g.add(post);
+  ['A', 'CT', 'B'].forEach((pin, i) => {
+    const x = S_.bornes.x[i], hex = pin === 'CT' ? '#1b1b1d' : '#e8c21a';
+    const w = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V3(x * 0.6, 2 + 20, zc + S_.nucleo[2] / 2 + S_.carrete[2]), V3(x * 0.8, 16, zc + 30), V3(x, S_.bornes.y + 3, P.d / 2 - 4)]), 20, 0.8, 6), M(hex, 0.5)); g.add(w);
+    const t = new THREE.Mesh(new THREE.PlaneGeometry(6, 3), new THREE.MeshBasicMaterial({ map:labelTex([pin], 80, 40, '#f2f2f2', null, 28), transparent:true })); t.position.set(x, S_.bornes.y + 5.8, P.d / 2 + 0.05); g.add(t);
+  });
+  addTerminals(g, c, { A:'#e8c21a', CT:'#1b1b1d', B:'#e8c21a' });
+  const hum = glowAt(g, 30, 22, P.d / 2 - 1, '#ffb030', 2.4);
+  return { group:g, update:() => { hum(c.p.on !== false ? 0.55 : 0); } };
+}
+BUILD.trafo = buildTrafo;
+/* puentes rectificadores: DB107 (DIP-4, 1 A), 2W10 (redondo, 2 A) y KBP206 (en línea, 2 A) */
+const buildBridge20 = BUILD.bridge;
+BUILD.bridge = function (c) {
+  const m = c.p.model || 'DB107'; if (m === 'DB107') return buildBridge20(c);
+  const g = new THREE.Group(), PI = Lab.PITCH, bm = M('#16171a', 0.55);
+  legs(g, [-1.5 * PI, -0.5 * PI, 0.5 * PI, 1.5 * PI], 1.6);
+  if (m === '2W10') {
+    const body = cyl(4.75, 5.2, bm, 32); body.rotation.x = Math.PI / 2; body.position.set(0, 1.6 + 4.75, 0); g.add(body);
+    const t = new THREE.Mesh(new THREE.CircleGeometry(4.3, 32), new THREE.MeshBasicMaterial({ map:labelTex(['2W10', '+   ~ ~   −'], 180, 180, '#d0d3d7', null, 40), transparent:true })); t.position.set(0, 1.6 + 4.75, 2.62); g.add(t);
+  } else {
+    const body = box(14.6, 10.2, 3.6, bm); body.position.y = 1.6 + 5.1; g.add(body);
+    const t = new THREE.Mesh(new THREE.PlaneGeometry(13.6, 8.6), new THREE.MeshBasicMaterial({ map:labelTex(['KBP206', '+  ~  ~  −'], 300, 190, '#d0d3d7', null, 46), transparent:true })); t.position.set(0, 1.6 + 5.1, 1.82); g.add(t);
+    const ch = box(1.6, 10.2, 3.7, M('#2a2c30', 0.5)); ch.position.set(-7.3, 1.6 + 5.1, 0); g.add(ch);
+  }
+  return { group:g, update:s => { const hot = s ? clamp((s.T - 60) / 90, 0, 1) : 0; bm.emissive.setRGB(hot * 0.6, hot * 0.1, 0); } };
+};
+/* relé de 12 V: etiqueta SRD-12VDC-SL-C sobre el cubo azul (modelo CAD o el básico) */
+const buildObj21 = buildObj;
+buildObj = function (c) {
+  const o = buildObj21(c);
+  if (c.type === 'relay' && c.p.coil == 12) {
+    o.group.updateMatrixWorld(true);
+    let tgt = null, best = 0; o.group.traverse(q => { if (!q.isMesh || !q.visible) return; const b = new THREE.Box3().setFromObject(q), sz = b.getSize(V3(0, 0, 0)); if (sz.x > 15 && sz.x < 22 && sz.y > 12 && sz.y * sz.z > best) { best = sz.y * sz.z; tgt = b; } });
+    if (tgt) { const l = new THREE.Mesh(new THREE.PlaneGeometry(17.5, 13.5), new THREE.MeshStandardMaterial({ map:labelTex(['SONGLE', 'SRD-12VDC-SL-C', '10A 250VAC'], 220, 170, '#eef2f8', '#1e5fd6', 30), roughness:0.45 }));
+      l.rotation.x = -Math.PI / 2; l.position.set((tgt.min.x + tgt.max.x) / 2, tgt.max.y + 0.06, (tgt.min.z + tgt.max.z) / 2); l.raycast = () => {}; o.group.add(l); }
+  }
+  return o;
+};
+/* paleta: variantes nuevas */
+const palP20 = palP;
+palP = function (type, part) { if (part && type === 'bridge') return { model:part }; if (part && type === 'relay') return { coil:+part }; return palP20(type, part); };
+ICONS.trafo = '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M9 5v14M15 5v14"/><path d="M5 9c1 0 1 1.5 2 1.5S8 9 9 9M15 9c1 0 1 1.5 2 1.5S18 9 19 9"/><path d="M3 21h4M10 21h4M17 21h4"/></svg>';
+[{ cat:'inst', grupo:'Fuentes', type:'trafo', title:'Transformador 12-0-12 V', sub:'120 V → secundario con toma central · 1 A', icon:'trafo', kw:'transformador trafo toma central tap 12-0-12 rectificador onda completa red 120v', wide:true, cls:'ins' },
+ { cat:'basicos', type:'bridge', part:'2W10', title:'Puente 2W10', sub:'Redondo · 4 diodos · 2 A', icon:'diode', kw:'puente rectificador 2w10 redondo onda completa' },
+ { cat:'basicos', type:'bridge', part:'KBP206', title:'Puente KBP206', sub:'En línea (SIP-4) · 2 A', icon:'diode', kw:'puente rectificador kbp206 kbp en linea onda completa' },
+ { cat:'inst', grupo:'Entradas y módulos', type:'relay', part:'12', title:'Módulo relé 12 V', sub:'Bobina de 12 V · COM / NO / NC', icon:'rly', kw:'rele relay 12v modulo carga' }].forEach(it => { PAL.push(it); PAL_ALL.push(it); });
+Object.assign(COMP_DEEP_DOCS, { trafo:{ t:'Transformador con toma central (12-0-12 V)',
+  que:'<p>Reduce los 120 V de la red a dos medias tensiones iguales y en <b>contrafase</b>: entre <b>A</b> y <b>CT</b> hay 12 V eficaces, entre <b>CT</b> y <b>B</b> otros 12 V invertidos, y entre <b>A</b> y <b>B</b> 24 V. El pico de cada mitad es 12·√2 ≈ 17 V.</p><ul><li><b>Onda completa con toma central:</b> un diodo desde A y otro desde B a la carga, y la carga vuelve a CT (0 V).</li><li><b>Puente rectificador:</b> el puente entre A y B entrega ≈ 24·√2 − 1,4 V.</li><li><b>Fuente simétrica ±12 V:</b> CT a tierra, A rectificado al 7812 y B al 7912.</li></ul>',
+  pins:{ A:'Extremo A del secundario.', CT:'Toma central: el 0 V común.', B:'Extremo B del secundario (en contrafase con A).' },
+  tips:'El primario (120 V) viene con su cable y enchufe: en el banco 3D nunca se toca la red, solo el secundario de baja tensión.', whatif:'<ul><li>Si cortocircuitas A con B, la corriente la limita solo el bobinado (≈ 1,2 Ω): los diodos o cables se calientan enseguida.</li></ul>' } });
+Object.assign(ROLE_ORDER, { trafo:0 });
+Object.assign(PX_CODE, { trafo:'TRAN-2P3S', 'bridge:2W10':'2W10', 'bridge:KBP206':'KBP206' });
+Object.assign(PX_TITLE2, { trafo:'Transformador 12-0-12 V' });
+const compValue21 = compValue;
+compValue = function (c) {
+  if (c.type === 'trafo') return (c.p.V || 12) + '-0-' + (c.p.V || 12) + ' V ' + (c.p.f || 60) + ' Hz';
+  if (c.type === 'bridge') return c.p.model || 'DB107';
+  if (c.type === 'relay' && c.p.coil == 12) return 'relé 12 V';
+  return compValue21(c);
+};
+const pinHint21 = pinHint;
+pinHint = function (c, pin) { if (c.type === 'trafo') return COMP_DEEP_DOCS.trafo.pins[pin] || ''; return pinHint21(c, pin); };
+/* Proteus: transformadores con toma central y puentes de 2 A */
+const pxMap21 = pxMap;
+pxMap = function (pp) {
+  const DV = (String(pp.dev || '') + ' ' + String(pp.val || '')).toUpperCase();
+  if (/TRAN-2P3S|TRAN-3P3S|CENTER\s*TAP|CT-TRAN|TRANSFORMER.*CT/.test(DV)) return { type:'trafo', p:{ V:12, f:60, on:true }, pin:pxPinMap({ S1:'A', 3:'A', A:'A', S2:'CT', 4:'CT', CT:'CT', S3:'B', 5:'B', B:'B' }), ignore:['P1', 'P2', '1', '2'], nota:'primario ignorado: el transformador del banco trae su enchufe de 120 V' };
+  const m = pxMap21(pp);
+  if (m && m.type === 'bridge') m.p = Object.assign({}, m.p, { model:/KBP\d+|GBU|RS20\d/.test(DV) ? 'KBP206' : /\b2W\d\d|\bW0\dM?|\bW10/.test(DV) ? '2W10' : 'DB107' });
+  return m;
+};
+/* inspector: transformador, modelo del puente y bobina del relé */
+function x21Html(c) {
+  const p = c.p;
+  if (c.type === 'trafo') return fSelect('f-tv', 'Secundario (cada mitad)', [6, 9, 12, 15, 18, 24].map(v => [v, v + '-0-' + v + ' V']), p.V || 12) + fSelect('f-tf', 'Frecuencia de la red', [[60, '60 Hz (América)'], [50, '50 Hz (Europa)']], p.f || 60) +
+    fCheck('f-ton', 'Enchufado a la red', p.on !== false) + readouts(['A → CT', 'i-ta', 'B → CT', 'i-tb', 'A → B (pico)', 'i-tp', 'Corriente', 'i-ti']) +
+    '<p class="note">Cada mitad entrega ' + (p.V || 12) + ' V eficaces (pico ' + fmt((p.V || 12) * Math.SQRT2, 1) + ' V). A y B están en contrafase: cuando A sube, B baja.</p>';
+  if (c.type === 'bridge') return fSelect('f-bm', 'Modelo', [['DB107', 'DB107 · DIP-4 · 1 A'], ['2W10', '2W10 · redondo · 2 A'], ['KBP206', 'KBP206 · en línea · 2 A']], p.model || 'DB107');
+  if (c.type === 'relay') return fSelect('f-coil', 'Bobina', [[5, '5 V (SRD-05VDC · 70 mA)'], [12, '12 V (SRD-12VDC · 30 mA)']], p.coil == 12 ? 12 : 5);
+  return '';
+}
+function x21Bind(c) {
+  const p = c.p, on = (id, fn) => { const el = $('#' + id); if (el) el.addEventListener('change', e => { pushUndo(); fn(e.target); commit(); }); };
+  on('f-tv', el => { p.V = +el.value; }); on('f-tf', el => { p.f = +el.value; }); on('f-ton', el => { p.on = el.checked; });
+  on('f-bm', el => { p.model = el.value; }); on('f-coil', el => { p.coil = +el.value; });
+}
+function x21Read(c, set) {
+  if (c.type !== 'trafo') return;
+  const a = S.sim.res[c.id + '/a'] || {}, b = S.sim.res[c.id + '/b'] || {}, V = c.p.on !== false ? (c.p.V || 12) : 0;
+  set('i-ta', fmt(V, 1) + ' V ef · ahora ' + fmt(a.v || 0, 1) + ' V'); set('i-tb', fmt(V, 1) + ' V ef · ahora ' + fmt(b.v || 0, 1) + ' V'); set('i-tp', fmt(2 * V * Math.SQRT2, 1) + ' V'); set('i-ti', fmtI(Math.max(Math.abs(a.i || 0), Math.abs(b.i || 0))));
+}
 
 function frame(now) {
   requestAnimationFrame(frame);
