@@ -957,6 +957,11 @@ details.pacc > .pal-grid { padding: 2px 8px 10px; }
         <div class="row" style="margin-top:8px"><button class="btn" data-pkgreset style="flex:1">↺ Volver a los modelos del banco</button></div>
         <div id="pkg-log" aria-live="polite"></div>
       </div>
+      <h3>Simulación</h3>
+      <div class="cfg-card">
+        <label class="chk"><input type="checkbox" id="cfg-protect"> 🛡 Proteger los componentes de este proyecto (avisan en vez de quemarse)</label>
+        <p class="lod-note">Se activa sola al importar desde Proteus. Desactívala para practicar con daños reales.</p>
+      </div>
       <h3>Proyecto</h3>
       <div class="cfg-card">
         <div class="row">
@@ -1041,6 +1046,7 @@ details.pacc > .pal-grid { padding: 2px 8px 10px; }
         <div id="px-log" class="px-log" aria-live="polite"></div>
         <div id="px-prev" class="px-prev"></div>
         <label class="fld px-bd"><span>Protoboards del armado</span><select id="px-boards"><option value="auto">Automático: comparar 1, 2 y 3 y elegir la más limpia</option><option value="1">Una protoboard</option><option value="2">Dos protoboards</option><option value="3">Tres protoboards</option></select></label>
+        <label class="chk px-bd"><input type="checkbox" id="px-protect" checked> 🛡 Proteger los componentes (avisan en vez de quemarse, como en Proteus)</label>
         <div class="btns"><button class="btn primary" id="px-import" disabled>Importar al banco 3D</button><button class="btn" id="px-fw" disabled>Cargar firmware en el micro</button><span class="sp"></span><button class="btn" id="px-export">Exportar netlist para Proteus (.sdf)</button></div>
         <section class="px-live" aria-labelledby="pxs-title">
           <h3 id="pxs-title">🔴 Enlace en Vivo con Proteus (Web Serial / COMPIM)</h3>
@@ -5058,6 +5064,7 @@ class Sim {
   fail(e, tipo, extra) {
     const s = e.s;
     if (s.failed) return;
+    if (this.project && this.project.protect) { if (s.protWarn) return; s.protWarn = true; const r0 = this.res[e.id]; if (this.onFail) this.onFail(Object.assign({ id:e.id, kind:e.type, led:!!e.led, tipo, i:r0 ? r0.i : 0, protegido:true }, extra || {})); return; }
     s.failed = true; s.damage = 1; s.tipo = tipo;
     if (e.type === 'C') s.vprev = 0;
     const r = this.res[e.id];
@@ -7706,6 +7713,7 @@ function sanitize(obj) {
     else { n.bd = clamp(int(c.bd, 0), 0, p.board.n - 1); n.row = P.dip ? (Lab.dipDef(n).rows || ['e'])[0] : (Lab.isBoardRow(c.row) ? c.row : 'a'); n.col = clamp(int(c.col, 1), 0, p.board.cols - 1); }
     p.components.push(n);
   });
+  if (obj.protect) p.protect = true;
   if (obj.robo && typeof obj.robo === 'object' && ['line', 'bal', 'arm', 'avoid'].includes(obj.robo.mode)) p.robo = { mode:obj.robo.mode, track:['ovalo', 'ocho', 'curvas'].includes(obj.robo.track) ? obj.robo.track : 'ovalo' };
   const ids = new Map(p.components.map(c => [c.id, c]));
   const okEp = e => e && ((e.k === 'h' && Lab.ROWS.includes(e.row) && Number.isInteger(e.col) && e.col >= 0 && e.col < p.board.cols && clamp(int(e.bd, 0), 0, 9) < p.board.n) ||
@@ -11447,7 +11455,7 @@ function pxBuild(design, gap) {
     if (cl && cl.V) rep.power[id] = cl.V;
     net.nodes.forEach(nd => {
       const it = byRef.get(String(nd.ref).toUpperCase()); if (!it) { rep.dropped++; return; }
-      const rk = String(nd.ref).toUpperCase() + '|' + nd.pin, pin = PX.remap && PX.remap[rk] !== undefined ? PX.remap[rk] : (it.pin(String(nd.pin)) || pxNormPin(it, nd.pin)); if (!pin) { rep.dropped++; return; }
+      const rk = String(nd.ref).toUpperCase() + '|' + nd.pin, pin = PX.remap && PX.remap[rk] !== undefined ? PX.remap[rk] : (it.pin(String(nd.pin)) || pxNormPin(it, nd.pin)); if (!pin) { if (!(it.ignore && it.ignore.includes(String(nd.pin).toUpperCase().trim()))) rep.dropped++; return; }
       conns.get(it)[pin] = id; use[id] = (use[id] || 0) + 1; rep.pins++;
     });
   });
@@ -11455,6 +11463,7 @@ function pxBuild(design, gap) {
   const ard5 = id => items.some(it => (it.type === 'arduino' && conns.get(it)['5V'] === id) || (it.type === 'supply' && conns.get(it)['+'] === id));
   pxInstFill(items, conns, use, rep.power);
   pxPowerFix(items, conns, use, rep);
+  pxCapOrient(items, conns, rep);
   const pw = Object.keys(rep.power).sort((x, y) => (use[y] || 0) - (use[x] || 0)), main = pw[0];
   const rails = main ? { N1: 'gnd', P1: main, P2: main, N2: 'gnd' } : (use.gnd ? { N1: 'gnd', N2: 'gnd' } : {});
   const bench = [], parts = [];
@@ -11523,6 +11532,7 @@ function pxImport() {
   for (const gap of [1, 3, 5]) { try { res = pxBuild(d, gap); break; } catch (err) { lastErr = err; } }
   if (!res) { pxLog('✖ No se pudo armar el circuito: ' + esc(lastErr.message), 'bad'); return; }
   const r = res.rep;
+  res.p.protect = !$('#px-protect') || $('#px-protect').checked;
   loadProject(sanitize(JSON.parse(JSON.stringify(res.p))), 'Circuito de Proteus importado: ' + r.n + ' piezas y ' + r.nets + ' nodos.');
   setViewMode(res.p.components.some(c => PARTS[c.type].kind === 'bench' && c.type !== 'supply') ? 'bench' : 'proto', true);
   if (PX.fw) pxLoadFw(true);
@@ -11535,6 +11545,8 @@ function pxImport() {
   if (pws.length) h += '<div class="t-alert ok"><b>⚡</b>Alimentación: ' + pws.map(id => esc(String(r.power[id]).replace('.', ',')) + ' V').join(', ') + ' en los rieles rojos y GND en los azules.</div>';
   if (r.plan) h += pxPlanHtml(r.plan);
   if (d.elements) h += '<div class="t-alert"><b>🧩</b>Proteus exportó ' + d.elements + ' bloques de integrados multibloque (U1:A, U1:B…): los junté en su encapsulado y traduje sus pines (+IP, −IP, OP, V+, V−, A, B, Y) a las patas físicas.</div>';
+  if (r.capFix && r.capFix.length) h += '<div class="t-alert"><b>⚡</b>Capacitores «CAP» (sin polaridad en Proteus) que quedaron como electrolíticos: ' + r.capFix.map(esc).join(', ') + '. Los orienté con el + hacia el lado positivo para que no se dañen.</div>';
+  if (res.p.protect) h += '<div class="t-alert ok"><b>🛡</b>Protección de componentes activa: si algo se excede verás un aviso, pero no se quemará. Puedes desactivarla en Ajustes → Simulación.</div>';
   if (r.powerFix && r.powerFix.length) h += '<div class="t-alert"><b>🔌</b>Alimentación automática de los integrados: ' + r.powerFix.map(esc).join('; ') + '.</div>';
   { const gn = res.items.filter(it => it.gen); if (gn.length) h += '<div class="t-alert"><b>〰</b>Generadores de Proteus convertidos: ' + gn.map(it => '<b>' + esc(it.ref) + '</b> (' + esc(it.gen) + ' → ' + (it.type === 'supply' ? 'fuente de ' + fmt(it.p.V, 1) + ' V' : 'generador ' + ({ sine:'senoidal', square:'cuadrado', tri:'triangular' }[it.p.wave] || it.p.wave) + ' de ' + fmtHz(it.p.f) + ', ' + fmt(it.p.vpp, 1) + ' Vpp') + (it.nota ? '; ' + esc(it.nota) : '') + ')').join(', ') + '. La tierra del generador va al GND del circuito.</div>'; }
   if (r.skipped.length) h += '<div class="t-alert warn"><b>⚠</b>Sin equivalente en VectraLab 3D (omitidas): ' + r.skipped.slice(0, 12).map(esc).join(', ') + (r.skipped.length > 12 ? '…' : '') + '</div>';
@@ -13223,6 +13235,80 @@ function pxPowerFix(items, conns, use, rep) {
   });
   rep.powerFix = notes;
 }
+
+/* ================= v20.1 · importación de Proteus más fiel y protección de componentes ================= */
+/* redes de alimentación con nombres compuestos («VCC/VDD», «+5V/VCC») */
+const pxClassify20 = pxClassify;
+pxClassify = function (name) { const r = pxClassify20(name); if (r) return r; for (const q of String(name).split(/[\/|]/)) { const x = pxClassify20(q); if (x) return x; } return null; };
+const PX_NEAR = (list, v) => list.reduce((a, x) => Math.abs(Math.log(x / v)) < Math.abs(Math.log(a / v)) ? x : a, list[0]);
+const pxMap20 = pxMap;
+pxMap = function (pp) {
+  const D = String(pp.dev || '').toUpperCase(), V = String(pp.val || '').toUpperCase(), DV = D + ' ' + V, pr = pxProps(pp);
+  /* diodos de señal equivalentes al 1N4148 */
+  if (/\b1N914\b|\b1N916\b|\b1N4448\b|\b1N4150\b/.test(DV)) return { type:'diode', p:{ model:'1N4148' }, pin:pin => ({ 1:'A', 2:'K', A:'A', K:'K' })[String(pin).toUpperCase()] || null };
+  /* conmutador de dos vías: COM / NC / NO y su estado inicial */
+  if (/SPDT|SW-SPDT/.test(DV)) return { type:'spdt', p:{ on:+pr.STATE === 1 ? [false, true] : [true, false] }, pin:pxPinMap({ 1:'1', 2:'C', 3:'2', C:'C', COM:'C', A:'1', B:'2', NC:'1', NO:'2' }) };
+  const m = pxMap20(pp); if (!m) return m;
+  /* osciloscopio: base de tiempo, V/div y posición de cada canal tal como estaban en Proteus */
+  if (m.type === 'scope4' && (pr.HORIZVAL || pr.CHAVAL)) {
+    const p = Lab.defaultParams('scope4');
+    if (pxNum(pr.HORIZVAL)) p.tb = PX_NEAR(Lab.TB_LIST, pxNum(pr.HORIZVAL));
+    ['A', 'B', 'C', 'D'].forEach((L, i) => { const v = pxNum(pr['CH' + L + 'VAL']), ps = pxNum(pr['CH' + L + 'POS']); if (v) p.ch[i].vdiv = PX_NEAR(Lab.VD_LIST, v); if (ps !== null) p.ch[i].pos = Math.max(-4, Math.min(4, Math.round(ps / 40 * 2) / 2)); });
+    const ts = +pr.TRIGSRC; if (ts >= 0 && ts <= 3) p.trig.src = ts;
+    m.p = p;
+  }
+  return m;
+};
+/* SIGNAL GENERATOR de Proteus: perillas FREQV × FREQR, AMPLV × AMPLR, forma de onda, polaridad y entradas AM/FM sin conectar */
+const PX_SG_FR = [0.1, 1, 10, 100, 1e3, 1e4, 1e5, 1e6], PX_SG_AR = [1e-3, 1e-2, 0.1, 1], PX_SG_WAVE = ['sine', 'tri', 'tri', 'square'];
+const pxGenMap20 = pxGenMap;
+pxGenMap = function (pp) {
+  const m = pxGenMap20(pp); if (!m || m.type !== 'fgen' || !/SIGNAL|SIGGEN|^SIG/.test(String(m.gen || ''))) return m;
+  const pr = pxProps(pp);
+  m.pin = pin => ({ '+':'out', 1:'out', OUT:'out', '-':'gnd', 2:'gnd', GND:'gnd' })[String(pin).toUpperCase().trim()] || null;
+  m.ignore = ['A', 'F', 'AM', 'FM'];
+  if (pr.FREQV !== undefined || pr.AMPLV !== undefined || pr.WAVEFORM !== undefined) {
+    const fv = pxNum(pr.FREQV), fr = PX_SG_FR[+pr.FREQR] || 1e3, av = pxNum(pr.AMPLV), ar = PX_SG_AR[+pr.AMPLR] || 1;
+    const f = Math.max(0.1, Math.min(50000, (fv !== null ? fv / 10 : 1) * fr)), amp = Math.min(20, (av !== null ? av / 10 : 1) * ar), uni = +pr.UNIPOLAR === 1;
+    m.p = Object.assign({}, m.p, { wave:PX_SG_WAVE[+pr.WAVEFORM] || 'sine', f:+f.toPrecision(3), vpp:uni ? amp : Math.min(20, amp * 2), off:uni ? amp / 2 : 0 });
+    m.nota = (uni ? 'unipolar 0 a ' : '±') + fmt(amp, 2) + ' V, ' + fmtHz(f) + ' (perillas FREQ ' + fmt((fv || 0) / 10, 1) + ' × ' + fmtHz(fr) + ' y AMPL ' + fmt((av || 0) / 10, 1) + ' × ' + fmt(ar, 3) + ' V)';
+  }
+  return m;
+};
+/* capacitores: «CAP» de Proteus no tiene polaridad; si se convirtió en electrolítico con el + a tierra se da vuelta */
+function pxCapOrient(items, conns, rep) {
+  const neg = new Set(); items.forEach(it => { const cn = conns.get(it) || {}; if (['supply', 'batteryPack', 'portapilas'].includes(it.type) && cn['-'] && cn['-'] !== 'gnd') neg.add(cn['-']); });
+  const pos = new Set(Object.keys(rep.power)), fixed = [];
+  items.forEach(it => {
+    if (it.type !== 'capacitor') return;
+    const cn = conns.get(it); if (!cn) return;
+    const a = cn['+'], b = cn['-'];
+    if ((a === 'gnd' && b && b !== 'gnd' && !neg.has(b)) || (pos.has(b) && !pos.has(a))) { cn['+'] = b; cn['-'] = a; fixed.push(it.ref); }
+  });
+  rep.capFix = fixed;
+}
+
+/* ---------- protección de componentes: en los circuitos importados los excesos avisan en vez de quemar ---------- */
+const PROT_KIND = { W:'el cable se habría fundido', D:'el diodo/LED se habría quemado', R:'el resistor se habría quemado', Q:'el transistor se habría quemado', IC:'el integrado se habría quemado', PIN:'el pin se habría dañado', REG:'el regulador se habría quemado', MOT:'el motor se habría quemado', C:'el capacitor habría explotado' };
+const onFail20 = S.sim.onFail;
+S.sim.onFail = ev => {
+  if (!ev.protegido) return onFail20(ev);
+  const c = findComp(ev.id) || findComp(String(ev.id).split('/')[0]), a = Math.abs(ev.i || 0), cur = a >= 1 ? fmt(a, 1) + ' A' : fmt(a * 1000, 0) + ' mA';
+  toast('🛡 ' + (c ? c.name : 'Un cable') + ': ' + (PROT_KIND[ev.kind] || 'habría fallado') + (a ? ' (' + cur + ')' : '') + '. La protección de importación lo mantuvo intacto: revísalo antes de armarlo de verdad.', 'warn', whyFail(ev, c), c ? c.id : '*');
+};
+function protSync() { const el = $('#cfg-protect'); if (el && S.project) el.checked = !!S.project.protect; }
+setInterval(protSync, 1000);
+document.addEventListener('change', e => { if (e.target && e.target.id === 'cfg-protect' && S.project) { S.project.protect = e.target.checked; scheduleSave(); toast(e.target.checked ? '🛡 Protección activada: los excesos avisan sin quemar.' : 'Protección desactivada: los componentes se queman como en la vida real.', 'info'); } });
+/* pines que se ignoran a propósito (entradas AM/FM del SIGNAL GENERATOR): no se ofrecen para reasignar ni se conectan a la salida */
+const pxUnresolved20 = pxUnresolved;
+pxUnresolved = function (d) { return pxUnresolved20(d).filter(u => !(u.m && u.m.ignore && u.m.ignore.includes(String(u.pin).toUpperCase().trim()))); };
+/* números de Proteus como «2.e-003» o «10.» */
+pxNum = function (v) {
+  const s = String(v === undefined || v === null ? '' : v).trim().replace(',', '.').replace(/\s+/g, '').replace(/(HZ|V|S|SEC)$/i, '');
+  const m = /^([-+]?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?)(MEG|[pnuµmkKMG]?)/i.exec(s); if (!m) return null;
+  const k = m[2], mul = /^meg$/i.test(k) ? 1e6 : { p:1e-12, n:1e-9, u:1e-6, 'µ':1e-6, m:1e-3, k:1e3, K:1e3, M:1e6, G:1e9, '':1 }[k];
+  const x = parseFloat(m[1]) * (mul === undefined ? 1 : mul); return isFinite(x) ? x : null;
+};
 
 function frame(now) {
   requestAnimationFrame(frame);
