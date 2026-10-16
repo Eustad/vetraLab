@@ -570,6 +570,10 @@ details.pacc > .pal-grid { padding: 2px 8px 10px; }
 .rotgrp .btns { flex-wrap: wrap; }
 :root { --ch3:#ff5ad8; --ch4:#5b8cff; }
 .px-bd { margin:8px 0 4px; }
+#st-save { color: var(--ok, #62d48e); transition: opacity .6s; } #st-save.fresh { animation: vlSaved 1.6s ease-out; } @keyframes vlSaved { 0% { opacity: .2; } 15% { opacity: 1; } 100% { opacity: .75; } }
+#viewdock .camctl { display: inline-flex; gap: 2px; } #viewdock .camctl button { min-width: 34px; padding: 4px 7px; font: 600 12px/1 "JetBrains Mono", monospace; }
+.px-val { margin: 8px 0; padding: 8px 10px; border: 1px solid var(--line, #2b3237); border-radius: 8px; font-size: 12.5px; } .px-val ul { margin: 6px 0 0; padding-left: 18px; } .px-val li { margin: 4px 0; } .px-val li.warn { color: var(--warn, #f0b429); } .px-val li.ok { color: var(--ok, #62d48e); } .px-val li.bad { color: var(--bad, #ff6b5b); } .px-val small { display: block; opacity: .75; margin-top: 3px; }
+.px-pull, .pin-picks { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; } .px-pull .btn[aria-pressed="true"] { outline: 2px solid var(--accent, #f2d544); }
 #editor { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(8, 10, 12, .55); padding: 18px; }
 .ed-card { resize: both; min-width: min(520px, 100%); min-height: 340px; max-width: 100%; max-height: 100%; width: min(980px, 100%); height: min(720px, 100%); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,.45); position: relative; }
 .ed-card header, .ed-card footer { display: flex; align-items: center; gap: 8px; padding: 10px 12px; flex-wrap: wrap; }
@@ -1098,7 +1102,7 @@ details.pacc > .pal-grid { padding: 2px 8px 10px; }
     <div id="insp-body"></div>
   </aside>
 
-  <footer id="stat"><span><i class="led" id="status-led"></i><span id="status-main">Cargando</span></span><span class="mono" id="status-src"></span><span class="mono" id="status-dt"></span><span class="mono" id="status-time"></span><span class="sp"></span><span class="st-r" id="st-prac"></span><span class="st-r" id="st-count"></span><span class="st-r" id="st-cad" hidden></span><span class="st-r mono" id="st-perf"></span><span class="st-r" id="st-eng"></span></footer>
+  <footer id="stat"><span><i class="led" id="status-led"></i><span id="status-main">Cargando</span></span><span class="mono" id="status-src"></span><span class="mono" id="status-dt"></span><span class="mono" id="status-time"></span><span class="sp"></span><span class="st-r" id="st-prac"></span><span class="st-r" id="st-count"></span><span class="st-r" id="st-save" hidden></span><span class="st-r" id="st-eco" hidden title="El editor cubre la escena: el 3D se dibuja a ≈18 FPS y la simulación sigue a velocidad normal">🌙 Ahorro 3D</span><span class="st-r" id="st-cad" hidden></span><span class="st-r mono" id="st-perf"></span><span class="st-r" id="st-eng"></span></footer>
 <input type="file" id="pkg-file" hidden multiple accept=".zip,.glb">
 </div>
 
@@ -11464,6 +11468,7 @@ function pxBuild(design, gap) {
   pxInstFill(items, conns, use, rep.power);
   pxPowerFix(items, conns, use, rep);
   pxCapOrient(items, conns, rep);
+  pxFloating(items, conns, use, rep);
   const pw = Object.keys(rep.power).sort((x, y) => (use[y] || 0) - (use[x] || 0)), main = pw[0];
   const rails = main ? { N1: 'gnd', P1: main, P2: main, N2: 'gnd' } : (use.gnd ? { N1: 'gnd', N2: 'gnd' } : {});
   const bench = [], parts = [];
@@ -11547,6 +11552,7 @@ function pxImport() {
   if (d.elements) h += '<div class="t-alert"><b>🧩</b>Proteus exportó ' + d.elements + ' bloques de integrados multibloque (U1:A, U1:B…): los junté en su encapsulado y traduje sus pines (+IP, −IP, OP, V+, V−, A, B, Y) a las patas físicas.</div>';
   if (r.capFix && r.capFix.length) h += '<div class="t-alert"><b>⚡</b>Capacitores «CAP» (sin polaridad en Proteus) que quedaron como electrolíticos: ' + r.capFix.map(esc).join(', ') + '. Los orienté con el + hacia el lado positivo para que no se dañen.</div>';
   if (res.p.protect) h += '<div class="t-alert ok"><b>🛡</b>Protección de componentes activa: si algo se excede verás un aviso, pero no se quemará. Puedes desactivarla en Ajustes → Simulación.</div>';
+  if (r.floating && r.floating.length) h += pxFloatHtml(r);
   if (r.powerFix && r.powerFix.length) h += '<div class="t-alert"><b>🔌</b>Alimentación automática de los integrados: ' + r.powerFix.map(esc).join('; ') + '.</div>';
   { const gn = res.items.filter(it => it.gen); if (gn.length) h += '<div class="t-alert"><b>〰</b>Generadores de Proteus convertidos: ' + gn.map(it => '<b>' + esc(it.ref) + '</b> (' + esc(it.gen) + ' → ' + (it.type === 'supply' ? 'fuente de ' + fmt(it.p.V, 1) + ' V' : 'generador ' + ({ sine:'senoidal', square:'cuadrado', tri:'triangular' }[it.p.wave] || it.p.wave) + ' de ' + fmtHz(it.p.f) + ', ' + fmt(it.p.vpp, 1) + ' Vpp') + (it.nota ? '; ' + esc(it.nota) : '') + ')').join(', ') + '. La tierra del generador va al GND del circuito.</div>'; }
   if (r.skipped.length) h += '<div class="t-alert warn"><b>⚠</b>Sin equivalente en VectraLab 3D (omitidas): ' + r.skipped.slice(0, 12).map(esc).join(', ') + (r.skipped.length > 12 ? '…' : '') + '</div>';
@@ -13310,6 +13316,250 @@ pxNum = function (v) {
   const x = parseFloat(m[1]) * (mul === undefined ? 1 : mul); return isFinite(x) ? x : null;
 };
 
+/* ================= v21 · 1. memoria de la GPU: limpieza profunda de geometrías, materiales y TODAS las texturas ================= */
+const TEX_SLOTS = ['map', 'emissiveMap', 'bumpMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'alphaMap', 'aoMap', 'lightMap', 'displacementMap', 'specularMap', 'gradientMap', 'clearcoatMap', 'clearcoatNormalMap', 'clearcoatRoughnessMap', 'sheenColorMap', 'transmissionMap'];
+const VRAM = { geos:0, mats:0, texs:0 };
+glowTex.isShared = true;
+disposeObj = function (o) {
+  if (!o) return;
+  const seen = new Set();
+  o.traverse(m => {
+    const g = m.geometry;
+    if (g && !seen.has(g) && !(g.userData && g.userData.shared)) { seen.add(g); g.dispose(); VRAM.geos++; }
+    const mats = m.material ? (Array.isArray(m.material) ? m.material : [m.material]) : [];
+    mats.forEach(mt => {
+      if (!mt || seen.has(mt) || (mt.userData && mt.userData.shared)) return; seen.add(mt);
+      TEX_SLOTS.forEach(k => { const t = mt[k]; if (t && t.isTexture && !seen.has(t) && !t.isShared && !(t.userData && t.userData.shared) && t !== scene.environment) { seen.add(t); t.dispose(); VRAM.texs++; } });
+      mt.dispose(); VRAM.mats++;
+    });
+  });
+};
+/* al cargar un proyecto (Nuevo, práctica, importación de Proteus o deshacer) se vacían también las listas de render cacheadas */
+const loadProject20 = loadProject;
+loadProject = function (p, msg) { const r = loadProject20(p, msg); try { renderer.renderLists.dispose(); } catch (err) { /* sin listas */ } return r; };
+/* la sonda fantasma de la punta lógica comparte geometría con la pieza: solo se quita de la escena (sin dispose) */
+
+/* ================= v21 · 2. bucle de render: pausa con la pestaña oculta y modo ahorro con el editor maximizado ================= */
+let LOOP_PAUSED = false, lastRender = 0, CAMT = null;
+const frame20 = frame;
+frame = function (now) {
+  if (document.hidden) { LOOP_PAUSED = true; return; }   /* ni render ni solver MNA hasta volver a la pestaña */
+  if (CAMT) camTick(now);
+  frame20(now);
+};
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { autosaveNow(); return; }
+  if (LOOP_PAUSED) { LOOP_PAUSED = false; last = performance.now(); requestAnimationFrame(frame); }
+});
+function editorCovers() { const ed = $('#editor'); return !!(PANES.edMax && ed && !ed.hidden); }
+const render20 = renderer.render.bind(renderer);
+renderer.render = function (sc, cam) {
+  if (sc === scene && editorCovers()) { const n = performance.now(); if (n - lastRender < 55) return; lastRender = n; }   /* ≈ 18 FPS */
+  return render20(sc, cam);
+};
+setInterval(() => { const el = $('#st-eco'); if (el) el.hidden = !editorCovers(); }, 700);
+
+/* ================= v21 · 3. autoguardado local con recuperación de sesión ================= */
+const AUTOSAVE_KEY = 'vectralab_autosave_v21';
+let autoT = 0, lastSaved = '';
+function autosaveNow() {
+  if (!S.project) return;
+  let snap; try { snap = snapshot(); } catch (err) { return; }
+  if (snap === lastSaved) return;
+  try { localStorage.setItem(AUTOSAVE_KEY, snap); localStorage.setItem('lab3d.proyecto.v2', snap); lastSaved = snap; saveBadge(false); }
+  catch (err) { saveBadge(true); }
+}
+function saveBadge(err) {
+  const el = $('#st-save'); if (!el) return;
+  el.hidden = false; el.textContent = err ? '⚠ Sin espacio para el autoguardado' : '💾 Guardado ' + new Date().toLocaleTimeString('es', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  el.classList.remove('fresh'); void el.offsetWidth; el.classList.add('fresh');
+}
+scheduleSave = function () { clearTimeout(autoT); autoT = setTimeout(autosaveNow, 1500); };
+window.addEventListener('beforeunload', autosaveNow);
+window.addEventListener('pagehide', autosaveNow);
+setInterval(autosaveNow, 20000);   /* cambios sin evento propio: perillas girando, código en edición */
+
+/* ================= v21 · 4. validación previa a la importación de Proteus ================= */
+const PX_IN_RE = /^(\d[A-H]|IN[+-]\d?|IN[+-][A-D]|IN[+-]|CLK|INH|RST|RESET|TRIG|THR|CE|CP|MR|OE|SER|SRCLK|RCLK|SRCLR|EN\d?|ENABLE|D\d?|IN\d+)$/;
+function pxIsInput(names, i) {
+  const n = pxNormName(names[i]);
+  if (names[2] === 'J') return /^[A-H]$/.test(n);   /* CD40xx de compuertas: A–H entradas, J–M salidas */
+  return PX_IN_RE.test(n);
+}
+/* entradas de integrados sin conectar o solas en su nodo; con PX.pull se agrega una resistencia virtual de 10 kΩ */
+function pxFloating(items, conns, use, rep) {
+  const out = [], pos = Object.keys(rep.power).sort((a, b) => (use[b] || 0) - (use[a] || 0))[0] || null;
+  items.slice().forEach(it => {
+    if (it.type !== 'ic' || !Lab.IC[it.p.part]) return;
+    const cn = conns.get(it), names = Lab.IC[it.p.part].names;
+    names.forEach((nm, i) => {
+      if (!pxIsInput(names, i)) return;
+      const pin = String(i + 1), net = cn[pin];
+      if (net && (use[net] || 0) > 1) return;
+      out.push({ ref:it.ref, pin, name:nm, net:net || null });
+    });
+  });
+  rep.floating = out;
+  if (!PX.pull || !out.length) return;
+  const to = PX.pull === 'up' && pos ? pos : 'gnd';
+  out.slice(0, 24).forEach((f, k) => {
+    const it = items.find(q => q.ref === f.ref), cn = conns.get(it), net = f.net || ('fl_' + f.ref + '_' + f.pin);
+    cn[f.pin] = net; use[net] = (use[net] || 0) + 1;
+    const r = { ref:'RP' + (k + 1), type:'resistor', p:{ R:10000 }, pin:pin => ({ 1:'A', 2:'B', A:'A', B:'B' })[String(pin).toUpperCase()] || null, src:{ ref:'RP' + (k + 1) }, pull:true };
+    items.push(r); conns.set(r, { A:net, B:to }); use[net]++; use[to] = (use[to] || 0) + 1;
+  });
+  rep.pulled = { n:Math.min(24, out.length), to:to === 'gnd' ? 'GND' : 'VCC' };
+}
+function pxValidate() {
+  const d = PX.design; let box = $('#px-val');
+  if (!box) { box = document.createElement('div'); box.id = 'px-val'; box.className = 'px-val'; $('#px-log').after(box); }
+  if (!d) { box.innerHTML = ''; return; }
+  let res = null, err = null; const pull = PX.pull; PX.pull = null;
+  try { res = pxBuild(d, 1); } catch (e) { err = e; } finally { PX.pull = pull; if (S.project) Lab.setLayout(S.project.board); }
+  const li = []; const r = res && res.rep;
+  if (err) li.push('<li class="bad">✖ El armado de prueba falló: ' + esc(err.message) + '</li>');
+  if (r && r.powerFix && r.powerFix.length) li.push('<li>🔌 <b>Alimentación auto-enlazada</b> (' + r.powerFix.length + '): ' + r.powerFix.map(esc).join('; ') + '</li>');
+  else if (r) li.push('<li class="ok">🔌 Los pines de alimentación de los integrados ya vienen conectados en la netlist.</li>');
+  if (r && r.capFix && r.capFix.length) li.push('<li>⚡ <b>Capacitores reorientados</b> (CAP sin polaridad → electrolítico): ' + r.capFix.map(esc).join(', ') + '</li>');
+  const fl = (r && r.floating) || [];
+  if (fl.length) {
+    const byRef = {}; fl.forEach(f => { (byRef[f.ref] = byRef[f.ref] || []).push(f.name + ' (' + f.pin + ')'); });
+    li.push('<li class="warn">⚠ <b>Entradas flotantes</b> (' + fl.length + '): ' + Object.keys(byRef).map(k => '<b>' + esc(k) + '</b> ' + byRef[k].map(esc).join(', ')).join(' · ') +
+      '<div class="px-pull" role="group" aria-label="Resistencias virtuales"><button type="button" class="btn" data-pull="down" aria-pressed="' + (PX.pull === 'down') + '">⏚ Pull-down virtual 10 kΩ</button><button type="button" class="btn" data-pull="up" aria-pressed="' + (PX.pull === 'up') + '">⏶ Pull-up virtual 10 kΩ</button><button type="button" class="btn" data-pull="" aria-pressed="' + !PX.pull + '">Dejarlas así</button></div>' +
+      '<small>Una entrada CMOS al aire capta ruido y puede oscilar; en TTL se lee como 1. Tras importar, el tutor te deja resaltar cada pin en 3D.</small></li>');
+  } else if (r) li.push('<li class="ok">✔ Ninguna entrada de compuerta o integrado queda al aire.</li>');
+  const single = d.nets.filter(n => n.nodes.length === 1 && !/^(OSC|VM|AM|SG|LP|DMM|INS|WM|CNT)\d/i.test(n.nodes[0].ref)).map(n => n.nodes[0].ref + '.' + n.nodes[0].pin);
+  if (single.length) li.push('<li class="warn">⚠ <b>Nodos con una sola conexión</b> (' + single.length + '): ' + single.map(esc).join(', ') + '. Suelen ser entradas de un generador que Proteus no exporta o pines sin terminar.</li>');
+  box.innerHTML = '<b>Validación previa a la importación</b><ul>' + li.join('') + '</ul>';
+  $$('#px-val [data-pull]').forEach(b => b.addEventListener('click', () => { PX.pull = b.dataset.pull || null; pxValidate(); pxLog(PX.pull ? '🧷 Al importar se agregarán resistencias de ' + (PX.pull === 'up' ? 'pull-up a VCC' : 'pull-down a GND') + ' de 10 kΩ en las entradas flotantes.' : 'Las entradas flotantes quedarán sin resistencia.', 'ok'); }));
+}
+const pxPreview20 = pxPreview;
+pxPreview = function () { pxPreview20(); try { pxValidate(); } catch (e) { console.warn('VectraLab validación:', e); } };
+const pxFiles20 = pxFiles;
+pxFiles = async function (files) { PX.pull = null; const v = $('#px-val'); if (v) v.innerHTML = ''; return pxFiles20(files); };
+/* Intel HEX: cada línea con «:», longitud, tipo de registro y checksum correctos */
+function pxHexCheck(text) {
+  const lines = String(text).replace(/\r/g, '').split('\n'), hx = n => n.toString(16).toUpperCase().padStart(2, '0');
+  let recs = 0, eof = false;
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i].trim(); if (!l) continue;
+    const bad = why => ({ ok:false, line:i + 1, why, text:l.slice(0, 60) });
+    if (eof) return bad('hay datos después del registro de fin de archivo');
+    if (l[0] !== ':') return bad('no empieza con «:»');
+    if (!/^:[0-9A-Fa-f]+$/.test(l)) return bad('tiene caracteres que no son hexadecimales');
+    if ((l.length - 1) % 2) return bad('tiene un número impar de dígitos');
+    const b = []; for (let k = 1; k < l.length; k += 2) b.push(parseInt(l.substr(k, 2), 16));
+    if (b.length < 5) return bad('el registro es demasiado corto');
+    if (b.length !== b[0] + 5) return bad('declara ' + b[0] + ' bytes de datos pero trae ' + (b.length - 5));
+    const sum = b.reduce((a, x) => a + x, 0) & 0xFF;
+    if (sum) { const want = (0x100 - (b.slice(0, -1).reduce((a, x) => a + x, 0) & 0xFF)) & 0xFF; return bad('checksum incorrecto: dice ' + hx(b[b.length - 1]) + ', debería ser ' + hx(want)); }
+    if (b[3] > 5) return bad('tipo de registro desconocido (' + hx(b[3]) + ')');
+    if (b[3] === 1) eof = true;
+    recs++;
+  }
+  if (!recs) return { ok:false, line:0, why:'el archivo no tiene registros Intel HEX' };
+  return { ok:true, recs, eof };
+}
+const pxEntry20 = pxEntry;
+pxEntry = function (name, u8) {
+  if (/\.hex$/i.test(name) && !pxIsBinary(u8)) {
+    const r = pxHexCheck(pxText(u8));
+    if (!r.ok) { pxLog('✖ <b>' + esc(name) + '</b> está corrupto' + (r.line ? ' en la <b>línea ' + r.line + '</b>' : '') + ': ' + esc(r.why) + (r.text ? '<br><code>' + esc(r.text) + '</code>' : '') + '. No se cargó en el micro.', 'bad'); return; }
+    pxLog('✔ <b>' + esc(name) + '</b>: ' + r.recs + ' registros Intel HEX con checksum correcto' + (r.eof ? '' : ' (aviso: falta el registro de fin :00000001FF)') + '.', r.eof ? 'ok' : 'warn');
+  }
+  return pxEntry20(name, u8);
+};
+/* tras importar: resaltar en 3D un pin flotante */
+function pinFlash(c, pin) {
+  const h = Lab.compPins(c).find(q => q.pin === pin); if (!h) return;
+  const p = Lab.holeXZ(h.bd, h.row, h.col), ring = new THREE.Mesh(new THREE.TorusGeometry(1.6, 0.35, 8, 28), new THREE.MeshBasicMaterial({ color:0xff3b30, toneMapped:false, transparent:true, depthTest:false }));
+  ring.rotation.x = -Math.PI / 2; ring.position.set(p.x, 0.6, p.z); ring.renderOrder = 20; scene.add(ring);
+  const t0 = performance.now(), tick = () => { const k = (performance.now() - t0) / 4000; if (k >= 1) { scene.remove(ring); disposeObj(ring); return; } ring.scale.setScalar(1 + 0.6 * Math.abs(Math.sin(k * 18))); ring.material.opacity = 1 - k * 0.6; requestAnimationFrame(tick); };
+  tick();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-pinpick]'); if (!b) return;
+  const [ref, pin] = b.dataset.pinpick.split('|'), c = S.project.components.find(q => q.name === ref); if (!c) return;
+  selectItem({ type:'comp', id:c.id }); focusSelected(); setTimeout(() => pinFlash(c, pin), 450);
+});
+function pxFloatHtml(r) {
+  const fl = (r.floating || []).slice(0, 30);
+  return '<div class="t-alert' + (r.pulled ? ' ok' : ' warn') + '"><b>' + (r.pulled ? '🧷' : '⚠') + '</b>' + (r.pulled ? 'Agregué ' + r.pulled.n + ' resistencias virtuales de 10 kΩ a ' + r.pulled.to + ' (RP1…) en las entradas flotantes.' : 'Entradas flotantes: tócalas para verlas en 3D.') +
+    '<div class="pin-picks">' + fl.map(f => '<button type="button" class="btn" data-pinpick="' + esc(f.ref + '|' + f.pin) + '">' + esc(f.ref) + ' · ' + esc(f.name) + ' (' + f.pin + ')</button>').join('') + '</div></div>';
+}
+
+/* ================= v21 · 5. controles de cámara en pantalla y modo trackpad / táctil ================= */
+const TRACK = { pan:false };
+try { TRACK.pan = localStorage.getItem('vectralab_trackpad') === '1'; } catch (err) { /* sin almacenamiento */ }
+function applyTrack() {
+  controls.mouseButtons.LEFT = TRACK.pan ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
+  if (controls.touches) controls.touches.ONE = TRACK.pan ? THREE.TOUCH.PAN : THREE.TOUCH.ROTATE;
+  const b = $('[data-cam="track"]'); if (b) { b.setAttribute('aria-pressed', String(TRACK.pan)); b.textContent = TRACK.pan ? '✋ Paneo' : '🔄 Órbita'; }
+}
+function setTrack(v) { TRACK.pan = v; try { localStorage.setItem('vectralab_trackpad', v ? '1' : '0'); } catch (err) { /* sin almacenamiento */ } applyTrack(); toast(v ? 'Modo trackpad / táctil: arrastrar con un dedo o el clic izquierdo en el fondo DESPLAZA la vista; dos dedos acercan y giran.' : 'Modo órbita: arrastrar en el fondo GIRA la cámara.', 'info'); }
+/* tras soltar Espacio (paneo temporal) se vuelve al modo elegido */
+window.addEventListener('keyup', e => { if (e.key === ' ') applyTrack(); });
+window.addEventListener('blur', applyTrack);
+function camRotate(deg) { S.fly = null; CAMT = { kind:'rot', left:deg * Math.PI / 180, rate:Math.PI * 1.6 * Math.sign(deg), t:performance.now() }; }
+function camZoom(f) {
+  S.fly = null;
+  const off = camera.position.clone().sub(controls.target), d = off.length(), nd = clamp(d * f, controls.minDistance || 1, controls.maxDistance || 1e5);
+  CAMT = { kind:'zoom', from:d, to:nd, t0:performance.now(), t:performance.now() };
+}
+function camTick(now) {
+  const dt = Math.min(0.05, (now - CAMT.t) / 1000); CAMT.t = now;
+  const off = camera.position.clone().sub(controls.target);
+  if (CAMT.kind === 'rot') {
+    let step = CAMT.rate * dt; if (Math.abs(step) >= Math.abs(CAMT.left)) step = CAMT.left;
+    off.applyAxisAngle(V3(0, 1, 0), step); CAMT.left -= step; camera.position.copy(controls.target).add(off);
+    if (Math.abs(CAMT.left) < 1e-4) CAMT = null;
+  } else {
+    const k = Math.min(1, (now - CAMT.t0) / 280), e = 1 - Math.pow(1 - k, 3), d = CAMT.from + (CAMT.to - CAMT.from) * e;
+    camera.position.copy(controls.target).add(off.setLength(d)); if (k >= 1) CAMT = null;
+  }
+}
+{ const dock = $('#viewdock'), pre = $('#presets');
+  const g = document.createElement('div'); g.className = 'seg camctl'; g.setAttribute('role', 'group'); g.setAttribute('aria-label', 'Controles de cámara');
+  g.innerHTML = '<button type="button" data-cam="l90" title="Girar la vista 90° a la izquierda [Shift+[]">⟲90°</button><button type="button" data-cam="l45" title="Girar la vista 45° a la izquierda [[]">⟲45°</button>' +
+    '<button type="button" data-cam="r45" title="Girar la vista 45° a la derecha []]">⟳45°</button><button type="button" data-cam="r90" title="Girar la vista 90° a la derecha [Shift+]]">⟳90°</button>' +
+    '<button type="button" data-cam="zin" title="Acercar [+]">＋</button><button type="button" data-cam="zout" title="Alejar [−]">−</button>' +
+    '<button type="button" data-cam="track" aria-pressed="false" title="Modo trackpad / táctil: un dedo o el clic izquierdo en el fondo desplaza la vista en vez de girarla [T]">🔄 Órbita</button>';
+  if (dock) (pre && pre.nextSibling ? dock.insertBefore(g, pre.nextSibling) : dock.appendChild(g));
+  g.addEventListener('click', e => { const b = e.target.closest('[data-cam]'); if (!b) return; const k = b.dataset.cam;
+    if (k === 'track') setTrack(!TRACK.pan); else if (k === 'zin') camZoom(0.8); else if (k === 'zout') camZoom(1.25); else camRotate((k[0] === 'l' ? 1 : -1) * +k.slice(1)); });
+  applyTrack(); }
+window.addEventListener('keydown', e => {
+  const tag = (e.target.tagName || '').toLowerCase(); if (tag === 'input' || tag === 'select' || tag === 'textarea' || e.target.isContentEditable || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === '[' || e.key === '{') camRotate(e.shiftKey || e.key === '{' ? 90 : 45);
+  else if (e.key === ']' || e.key === '}') camRotate(e.shiftKey || e.key === '}' ? -90 : -45);
+  else if (e.key === '+' || e.key === '=') camZoom(0.8);
+  else if (e.key === '-' || e.key === '_') camZoom(1.25);
+  else if (e.key.toLowerCase() === 't' && !e.repeat) setTrack(!TRACK.pan);
+  else return;
+  e.preventDefault();
+});
+
+/* ================= v21 · 6. tooltips con la acción exacta y su atajo entre corchetes ================= */
+const TIPS = {
+  '[data-mode="select"]':'Seleccionar y mover piezas [V]', '[data-mode="cable"]':'Tender un cable entre dos puntos [C]',
+  '#b-undo':'Deshacer [Ctrl+Z]', '#b-redo':'Rehacer [Ctrl+Y] | [Ctrl+Shift+Z]', '#b-play':'Pausar o continuar la simulación [Espacio] (mantener Espacio + arrastrar: desplazar la vista)',
+  '[data-speed="0.1"]':'Cámara lenta: simulación ×0,1', '[data-speed="1"]':'Velocidad normal: simulación ×1', '[data-speed="4"]':'Rápido: simulación ×4',
+  '#b-reset':'Reiniciar: repara todo y descarga los capacitores', '#b-tutor':'Tutor de laboratorio (panel lateral)', '#b-guide':'Guía de la práctica (panel lateral)',
+  '#b-codetop':'Programa del microcontrolador (editor de código)', '#b-scope':'Mostrar u ocultar la pantalla del osciloscopio', '#b-insp':'Mostrar u ocultar el inspector',
+  '#b-proteus':'Importar / conectar Proteus: proyecto, netlist SDF o firmware HEX', '#b-light':'Luz y calidad de imagen', '#b-theme':'Cambiar tema claro / oscuro', '#b-full':'Pantalla completa [F11]',
+  '[data-nav="cat"]':'Piezas: catálogo arrastrable · Pick Devices [P]', '[data-nav="prac"]':'Prácticas y circuitos armados', '[data-nav="guide"]':'Guía de práctica',
+  '[data-nav="tutor"]':'Tutor IA: explicaciones y tour guiado', '[data-nav="cfg"]':'Ajustes de protoboard, simulación y proyecto', '#b-home':'Menú de inicio: elegir laboratorio', '#b-pal':'Mostrar u ocultar el panel de piezas',
+  '[data-vmode="proto"]':'Vista centrada en la protoboard [Shift+P]', '[data-vmode="bench"]':'Recorrer todo el banco en 3D [B] (caminar: W A S D, subir/bajar: Q E)',
+  '#b-flip':'Girar la pieza 180° en la protoboard [R]', '#b-focus':'Enfocar la cámara en la pieza [F]', '#b-del':'Eliminar la pieza o el cable seleccionado [Supr]',
+  '#b-replace':'Cambiar por otra pieza de la biblioteca conservando los cables', '#b-repair':'Reemplazar por una pieza nueva (repara el daño)',
+  '[data-rot="-45"]':'Girar el equipo 45° a la izquierda', '[data-rot="45"]':'Girar el equipo 45° a la derecha [Shift+R]', '[data-rot="90"]':'Girar el equipo 90° [R]', '[data-rot="0"][data-abs]':'Volver a 0°',
+  '#b-probe':'Sondear el circuito con la punta lógica (clic fija el punto, [Esc] termina)', '#s-auto':'Autoajuste de canales y base de tiempo', '#s-run':'Detener o reanudar la captura del osciloscopio'
+};
+function applyTips(root) { Object.keys(TIPS).forEach(sel => (root || document).querySelectorAll(sel).forEach(el => { el.title = TIPS[sel]; if (!el.getAttribute('aria-label') && !el.textContent.trim()) el.setAttribute('aria-label', TIPS[sel]); })); }
+applyTips();
+const renderInspector20 = renderInspector;
+renderInspector = function () { const r = renderInspector20.apply(this, arguments); try { applyTips($('#inspector')); } catch (err) { /* sin inspector */ } return r; };
+
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
@@ -13405,7 +13655,7 @@ function boot() {
   new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
   let saved = null;
-  try { saved = localStorage.getItem('lab3d.proyecto.v2') || localStorage.getItem('lab3d.proyecto.v1'); } catch (e) { /* sin almacenamiento */ }
+  try { saved = localStorage.getItem('vectralab_autosave_v21') || localStorage.getItem('lab3d.proyecto.v2') || localStorage.getItem('lab3d.proyecto.v1'); } catch (e) { /* sin almacenamiento */ }
   try { S.project = saved ? sanitize(JSON.parse(saved)) : Lab.scenarios.base(); } catch (e) { S.project = Lab.scenarios.base(); }
   S.hudMin = stage.clientWidth < 640;
   ensureBoards(); rebuildScene(); renderInspector(); syncButtons(); syncBoardUI(); syncHud(); renderPalette(); setMode('select'); resize();

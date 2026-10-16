@@ -5,6 +5,15 @@ Simulador de circuitos electrónicos en 3D en un solo archivo HTML (three.js + m
 ## Abrir
 Abre `index.html` en Chrome o Edge (necesita internet la primera vez para cargar three.js y las bibliotecas CAD desde CDN).
 
+## Versión 21
+- Memoria de la GPU: limpieza profunda de geometrías, materiales y todas las texturas (mapas de color, relieve, emisivo…) al borrar piezas, cambiar de práctica, crear un proyecto nuevo o importar.
+- Bucle de render: se detiene con la pestaña oculta (sin render ni solver MNA) y baja a ≈18 FPS cuando el editor de código está maximizado (la simulación sigue igual).
+- Autoguardado en localStorage (clave vectralab_autosave_v21): 1,5 s después de cada cambio, cada 20 s, al ocultar la pestaña y al cerrarla; indicador «💾 Guardado» en la barra de estado.
+- Importador de Proteus: validación previa (alimentación auto-enlazada, capacitores reorientados, entradas flotantes con pull-down/pull-up virtual de 10 kΩ, nodos de una sola conexión) y resaltado en 3D de cada pin flotante tras importar.
+- Firmware .hex: validación Intel HEX línea por línea (longitud, tipo de registro, checksum) con la línea exacta del error.
+- Cámara: giros de 45°/90° ([ ] y Shift), zoom (+ −) y modo trackpad / táctil (T) desde la barra de vista.
+- Tooltips con la acción y su atajo entre corchetes en la barra superior, el rail y el inspector.
+
 ## Versión 20.1
 - Capacitores «CAP» de Proteus (sin polaridad) que quedan como electrolíticos se orientan con el + hacia el lado positivo: ya no explotan al iniciar.
 - SIGNAL GENERATOR: lee FREQV×FREQR, AMPLV×AMPLR, forma de onda y modo unipolar; sus entradas AM/FM ya no le quitan la salida.
