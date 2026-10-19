@@ -5,6 +5,12 @@ Simulador de circuitos electrónicos en 3D en un solo archivo HTML (three.js + m
 ## Abrir
 Abre `index.html` en Chrome o Edge (necesita internet la primera vez para cargar three.js y las bibliotecas CAD desde CDN).
 
+## Versión 21.2
+- Cables entre agujeros ruteados con A* ortogonal en 3D (src/wire-router.js): salen verticales del agujero, viajan pegados a la protoboard (0,85 mm) esquivando patas y cuerpos de las piezas, giran en 90° con codos redondeados y solo suben una capa (1,6 mm) para cruzar otro cable; no se enciman.
+- Los obstáculos siguen la forma real de cada pieza (patas, cuerpo, cúpula del LED), así el cable puede pasar bajo los cuerpos elevados como en un montaje real.
+- Los cables a instrumentos de mesa siguen en arco; cualquier cable se puede pasar a «Arco» desde el inspector.
+- Pruebas del enrutador: node src/wire-router.test.mjs · demo: src/wire-router-demo.html.
+
 ## Versión 21.1
 - Pulsador momentáneo real: queda presionado mientras mantienes el clic o el dedo (antes hacía un pulso de 220 ms o se soltaba al mover el puntero); el cuerpo y las patas siguen sirviendo para moverlo.
 - Transformador 120 V → 12-0-12 V con toma central (6 a 24 V por mitad, 50/60 Hz): onda completa con 2 diodos, puente o fuente simétrica ±12 V.

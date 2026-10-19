@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wire Router A*</title>
+<style>
+  :root { --bg:#16191c; --fg:#e7e9ea; --mute:#9aa3aa; --panel:rgba(22,25,28,.86); --line:#2b3237; --accent:#f2d544; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--fg); font:14px system-ui, sans-serif; overflow:hidden; }
+  #hud { position:absolute; left:12px; top:12px; max-width:min(360px, calc(100% - 24px)); padding:10px 12px; background:var(--panel); border:1px solid var(--line); border-radius:10px; }
+  #hud h1 { font-size:15px; margin:0 0 6px; } #hud p { margin:4px 0; color:var(--mute); font-size:12.5px; }
+  #hud .row { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  #hud button { background:#232a30; color:var(--fg); border:1px solid var(--line); border-radius:7px; padding:6px 10px; cursor:pointer; font:inherit; font-size:12.5px; }
+  #hud button[aria-pressed="true"] { outline:2px solid var(--accent); }
+  #stats { font:12px ui-monospace, monospace; color:var(--fg); margin-top:6px; white-space:pre-line; }
+</style>
+</head>
+<body>
+<div id="hud">
+  <h1>Enrutamiento ortogonal A* en 3D</h1>
+  <p>Cada cable sale vertical del agujero, viaja solo en ejes X / Y / Z esquivando chips y cables ya tendidos, y redondea los codos de 90°.</p>
+  <div class="row"><button id="b-new">Nuevos cables</button><button id="b-hard" aria-pressed="true">Cables como obstáculo duro</button><button id="b-raw" aria-pressed="false">Ver ruta sin suavizar</button></div>
+  <div id="stats">Calculando…</div>
+</div>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { createWireRouter, buildWireGeometry } from './wire-router.js';
+
+const P = 2.54, COLS = 40, ROWS = [-6, -5, -4, -3, -2, 2, 3, 4, 5, 6];   /* filas a–e y f–j a cada lado del canal central */
+const renderer = new THREE.WebGLRenderer({ antialias:true }); renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.shadowMap.enabled = true;
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#16191c');
+const camera = new THREE.PerspectiveCamera(40, 1, 1, 3000); camera.position.set(20, 95, 110);
+const controls = new OrbitControls(camera, renderer.domElement); controls.target.set(COLS * P / 2, 0, 0); controls.enableDamping = true;
+scene.add(new THREE.HemisphereLight('#ffffff', '#30353a', 1.1));
+const sun = new THREE.DirectionalLight('#fff4e6', 1.6); sun.position.set(60, 140, 80); sun.castShadow = true; Object.assign(sun.shadow.camera, { left:-120, right:120, top:120, bottom:-120 }); scene.add(sun);
+
+/* protoboard con agujeros */
+const board = new THREE.Mesh(new THREE.BoxGeometry(COLS * P + 8, 3, 18 * P), new THREE.MeshStandardMaterial({ color:'#ecebe5', roughness:0.8 }));
+board.position.set((COLS - 1) * P / 2, -1.5, 0); board.receiveShadow = true; scene.add(board);
+const holeGeo = new THREE.BoxGeometry(1, 0.2, 1), holeMat = new THREE.MeshBasicMaterial({ color:'#3a3d42' });
+const holes = new THREE.InstancedMesh(holeGeo, holeMat, COLS * ROWS.length); let hn = 0; const mtx = new THREE.Matrix4();
+for (let c = 0; c < COLS; c++) for (const r of ROWS) { mtx.setPosition(c * P, 0.02, r * P); holes.setMatrixAt(hn++, mtx); }
+scene.add(holes);
+
+/* chips DIP sobre el canal central: son los obstáculos */
+const chips = [[6, 7], [18, 8], [30, 6]].map(([c0, n]) => {
+  const min = new THREE.Vector3(c0 * P - 1.2, 0, -3.6), max = new THREE.Vector3((c0 + n - 1) * P + 1.2, 4.6, 3.6);
+  const m = new THREE.Mesh(new THREE.BoxGeometry(max.x - min.x, max.y, max.z - min.z), new THREE.MeshStandardMaterial({ color:'#1a1b1e', roughness:0.84 }));
+  m.position.set((min.x + max.x) / 2, max.y / 2, 0); m.castShadow = true; scene.add(m);
+  return new THREE.Box3(min, max);
+});
+
+const COLORS = ['#e8432e', '#2f9e44', '#1c7ed6', '#f59f00', '#ae3ec9', '#0ca678', '#e64980', '#fab005', '#4263eb', '#868e96', '#d9480f', '#37b24d'];
+const wires = new THREE.Group(); scene.add(wires);
+let hard = true, raw = false, seed = 11;
+const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+
+function build() {
+  wires.children.forEach(m => { m.geometry.dispose(); m.material.dispose(); }); wires.clear();
+  const R = createWireRouter({ THREE, hardWires:hard });
+  chips.forEach(b => R.addObstacle(b));
+  const usedHoles = new Set(), pick = () => { for (;;) { const c = Math.floor(rnd() * COLS), r = ROWS[Math.floor(rnd() * ROWS.length)], k = c + ':' + r; if (!usedHoles.has(k)) { usedHoles.add(k); return { x:c * P, y:0, z:r * P }; } } };
+  const pairs = Array.from({ length:12 }, () => ({ a:pick(), b:pick() }));
+  const t0 = performance.now(), rs = R.routeAll(pairs), ms = performance.now() - t0;
+  let bends = 0, len = 0;
+  rs.forEach((r, n) => {
+    const geo = raw ? buildWireGeometry(THREE, r.points, { radius:0.55, bendRadius:0.001 }) : r.buildGeometry({ radius:0.55, bendRadius:1.6 });
+    bends += geo.userData.bends; len += geo.userData.wireLength;
+    const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color:COLORS[n % COLORS.length], roughness:0.45 })); m.castShadow = true; wires.add(m);
+  });
+  const failed = rs.filter(r => !r.ok).length;
+  document.getElementById('stats').textContent = rs.length + ' cables en ' + ms.toFixed(1) + ' ms (' + (ms / rs.length).toFixed(1) + ' ms/cable)\n' + bends + ' codos · ' + (len / 10).toFixed(1) + ' cm de cable' + (failed ? '\n⚠ ' + failed + ' sin ruta (arco de respaldo)' : '\n✔ todos ruteados');
+  window.__wr = { rs, ms, failed };
+}
+document.getElementById('b-new').onclick = () => { seed = (seed * 31 + 7) % 2147483647; build(); };
+document.getElementById('b-hard').onclick = e => { hard = !hard; e.target.setAttribute('aria-pressed', hard); build(); };
+document.getElementById('b-raw').onclick = e => { raw = !raw; e.target.setAttribute('aria-pressed', raw); build(); };
+build();
+
+function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+</script>
+</body>
+</html>

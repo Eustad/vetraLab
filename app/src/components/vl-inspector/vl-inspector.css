@@ -1,0 +1,12 @@
+:host { display: block; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+h2 { font-size: 18px; margin: 0; font-family: var(--mono); }
+.kind, .hint { color: var(--muted); margin: 2px 0 8px; font-size: 13px; }
+.chip { font: 600 11px var(--mono); padding: 2px 7px; border-radius: 99px; border: 1px solid currentColor; }
+.chip.ok { color: var(--ok); } .chip.bad { color: var(--bad); } .chip.warn { color: var(--warn); }
+dl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 0; }
+dl div { background: var(--panel2); border: 1px solid var(--line); border-radius: 7px; padding: 6px 8px; }
+dt { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+dd { margin: 2px 0 0; font: 13px var(--mono); }
+.fail { color: var(--bad); font-size: 13px; }
+.repair { width: 100%; padding: 7px; border-radius: 7px; border: 1px solid var(--bad); background: transparent; color: var(--bad); font-weight: 600; }

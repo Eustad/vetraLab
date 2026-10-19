@@ -1,0 +1,11 @@
+/* ---------- v16 · Auto-Stub de Proteus e inspector ---------- */
+#px .px-prev .px-stub { color: #b86e00; font-weight: 650; background: color-mix(in srgb, #f0a020 16%, transparent); border: 1px solid color-mix(in srgb, #f0a020 50%, transparent); padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
+#px .px-prev tr.stub td:first-child { color: #d48400; }
+.stub-box { display: grid; gap: 6px; padding: 10px; border-radius: 10px; border: 1px solid color-mix(in srgb, #f0a020 55%, var(--line)); background: color-mix(in srgb, #f0a020 10%, var(--panel2)); margin-bottom: 8px; }
+.stub-box b { color: #c27400; }
+.stub-box span { font-size: 12px; color: var(--muted); line-height: 1.45; }
+.pinout.stub .body { color: #d48400; }
+.kpgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin: 4px 0 8px; }
+.kpgrid button { font: 700 15px var(--mono); padding: 9px 0; border-radius: 8px; border: 1px solid var(--line2); background: var(--raise); color: var(--fg); cursor: pointer; touch-action: none; }
+.kpgrid button.l { color: #d8321f; }
+.kpgrid button[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); transform: translateY(1px); }

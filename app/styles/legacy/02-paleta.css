@@ -1,0 +1,43 @@
+/* ---------- paleta ---------- */
+#pal { grid-area: pal; background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+.pal-head { padding: 12px 14px 10px; border-bottom: 1px solid var(--line); display: grid; gap: 8px; }
+.pal-head .seg { display: grid; grid-template-columns: repeat(4, 1fr); }
+.pal-head .seg button { justify-content: center; padding: 5px 4px; }
+.search { display: flex; align-items: center; gap: 8px; background: var(--raise); border: 1px solid var(--line); border-radius: 9px; padding: 0 10px; color: var(--muted); }
+.search:focus-within { border-color: var(--accent); }
+.search input { border: 0; background: transparent; outline: none; padding: 7px 0; width: 100%; color: var(--fg); }
+.pal-scroll { overflow-y: auto; overflow-x: hidden; padding: 12px 14px 18px; display: grid; gap: 8px; align-content: start; min-height: 0; flex: 1; }
+h3.sec { margin: 0 0 8px; font-size: 11px; font-weight: 650; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-stretch: 85%; display: flex; align-items: center; gap: 8px; }
+h3.sec::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.pal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pal-item { position: relative; display: grid; gap: 5px; padding: 9px 10px 10px; background: var(--raise); border: 1px solid var(--line); border-radius: 10px; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; transition: border-color .15s, transform .15s, box-shadow .15s; min-width: 0; }
+.pal-item:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 12px var(--shadow); }
+.pal-item:active { cursor: grabbing; }
+.pal-item.wide { grid-column: span 2; grid-template-columns: 58px minmax(0, 1fr); align-items: center; column-gap: 10px; }
+.pal-item .ico { height: 28px; display: flex; align-items: center; color: var(--accent); }
+.pal-item .ico svg { height: 28px; width: auto; max-width: 100%; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.pal-item b { display: block; font-weight: 620; font-size: 13.5px; font-stretch: 92%; line-height: 1.15; }
+.pal-item b.mono { font-family: var(--mono); font-size: 12.5px; font-weight: 600; letter-spacing: -.01em; }
+.pal-item span { display: block; font-size: 11.5px; color: var(--muted); line-height: 1.25; margin-top: 2px; }
+.pal-empty { color: var(--muted); margin: 0; font-size: 13px; }
+.cfg { background: var(--raise); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 9px; }
+.cfg .r { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.cfg label { font-size: 12.5px; color: var(--muted); font-weight: 560; }
+.cfg select { background: var(--panel2); border: 1px solid var(--line); border-radius: 7px; padding: 5px 8px; min-height: 32px; max-width: 160px; }
+.stepper { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.stepper button { width: 30px; height: 30px; border: 0; background: var(--panel2); font-weight: 700; }
+.stepper button:hover { color: var(--accent); }
+.stepper output { min-width: 32px; text-align: center; font-family: var(--mono); font-size: 13px; }
+.meta { margin: 0; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.bdmini { height: 30px; display: flex; flex-direction: column; gap: 2px; justify-content: center; }
+.bdmini i { display: block; height: 7px; border-radius: 2px; background: repeating-linear-gradient(90deg, var(--line2) 0 1.5px, transparent 1.5px 4px), var(--panel2); border: 1px solid var(--line2); transition: width .25s; }
+.scn { display: grid; gap: 6px; }
+.scn button { display: grid; grid-template-columns: 10px 1fr; gap: 1px 10px; text-align: left; padding: 8px 10px; background: transparent; border: 1px solid var(--line); border-radius: 9px; align-items: center; }
+.scn button:hover { border-color: var(--accent); background: var(--raise); }
+.scn button i { grid-row: span 2; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
+.scn button i.bad { background: var(--bad); }
+.scn button i.inst { background: var(--ch2); }
+.scn b { font-weight: 600; font-size: 13px; }
+.scn small { color: var(--muted); font-size: 11.5px; }
+.row { display: flex; gap: 6px; flex-wrap: wrap; }
+

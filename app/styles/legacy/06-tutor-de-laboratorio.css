@@ -1,0 +1,80 @@
+/* ---------- Tutor de laboratorio ---------- */
+#tutor { position: fixed; left: 16px; bottom: 44px; z-index: 16; width: min(440px, calc(100vw - 32px)); height: min(72vh, 680px); min-width: 300px; min-height: 280px; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); resize: both; overflow: hidden; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto auto; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 18px 50px var(--shadow); }
+#tutor[hidden] { display: none; }
+#tutor.min { height: auto !important; min-height: 0; resize: none; grid-template-rows: auto; }
+#tutor.min > :not(#t-head) { display: none; }
+#t-head { display: flex; align-items: center; gap: 9px; padding: 10px 12px 8px; cursor: move; user-select: none; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, var(--panel2), var(--panel)); border-radius: 14px 14px 0 0; }
+#t-head .t-ico { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--accent); color: var(--accent-fg); flex: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+#t-head .t-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+#t-head .t-tt { display: grid; min-width: 0; }
+#t-head .t-tt b { font-size: 13.5px; letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#t-head .t-tt small { font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#t-head .t-tt small i { font-style: normal; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); margin-right: 5px; vertical-align: 1px; box-shadow: 0 0 6px var(--ok); }
+#t-head .sp { flex: 1; }
+#t-head .ibtn { width: 30px; height: 30px; }
+#tutor .t-bar { display: flex; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+#tutor .t-bar .btn { min-height: 30px; font-size: 12.5px; padding: 4px 10px; }
+#t-msgs { position: relative; overflow-y: auto; padding: 12px 12px 6px; display: flex; flex-direction: column; gap: 10px; font-size: 13px; line-height: 1.5; }
+.t-msg { max-width: 94%; border-radius: 12px; padding: 9px 12px; border: 1px solid var(--line); background: var(--raise); box-shadow: 0 1px 2px var(--shadow); animation: t-in .22s ease-out; overflow-wrap: anywhere; }
+.t-msg.user { align-self: flex-end; background: var(--accent); border-color: var(--accent); color: var(--accent-fg); border-bottom-right-radius: 4px; font-weight: 550; }
+.t-msg.bot { align-self: flex-start; border-bottom-left-radius: 4px; border-left: 3px solid var(--accent); }
+.t-msg h4 { margin: 0 0 4px; font-size: 13.5px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.t-msg h5 { margin: 10px 0 3px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); font-stretch: 85%; }
+.t-msg p { margin: 5px 0; }
+.t-msg ul, .t-msg ol { margin: 5px 0; padding-left: 19px; }
+.t-msg li { margin: 3px 0; }
+.t-msg .fx { font-family: var(--mono); font-size: 12px; background: var(--panel2); border: 1px solid var(--line); padding: 0 5px; border-radius: 5px; white-space: nowrap; }
+.t-msg .fx-b { font-family: var(--mono); font-size: 12px; line-height: 1.65; background: var(--panel2); border-left: 3px solid var(--accent); padding: 6px 10px; border-radius: 6px; margin: 7px 0; overflow-x: auto; }
+.t-msg .t-mut { color: var(--muted); font-size: 12px; }
+.t-typing { align-self: flex-start; display: inline-flex; gap: 4px; padding: 10px 12px; border-radius: 12px; background: var(--raise); border: 1px solid var(--line); }
+.t-typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: t-dot 1s infinite ease-in-out; }
+.t-typing i:nth-child(2) { animation-delay: .15s; } .t-typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes t-dot { 0%, 80%, 100% { opacity: .25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+@keyframes t-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.comp-ref { display: inline-flex; align-items: center; gap: 3px; font-family: var(--mono); font-size: 11.5px; font-weight: 600; padding: 1px 7px; margin: 1px 1px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--accent) 60%, var(--line)); background: color-mix(in srgb, var(--accent) 12%, var(--raise)); color: var(--fg); cursor: pointer; vertical-align: 1px; line-height: 1.55; white-space: nowrap; }
+.comp-ref:hover, .comp-ref:focus-visible { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); outline: none; }
+.comp-ref.on { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+.t-alert { border-radius: 9px; padding: 6px 10px; margin: 7px 0; font-size: 12.5px; border: 1px solid var(--line); background: var(--panel2); }
+.t-alert.ok { border-color: color-mix(in srgb, var(--ok) 55%, var(--line)); background: color-mix(in srgb, var(--ok) 9%, var(--panel2)); }
+.t-alert.warn { border-color: color-mix(in srgb, var(--warn) 60%, var(--line)); background: color-mix(in srgb, var(--warn) 10%, var(--panel2)); }
+.t-alert.bad { border-color: color-mix(in srgb, var(--bad) 60%, var(--line)); background: color-mix(in srgb, var(--bad) 10%, var(--panel2)); }
+.t-alert b:first-child { margin-right: 4px; }
+.t-tbl { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 12px; }
+.t-tbl th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 650; padding: 3px 6px; border-bottom: 1px solid var(--line2); }
+.t-tbl td { padding: 4px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.t-tbl td:first-child { font-family: var(--mono); font-weight: 650; color: var(--accent); white-space: nowrap; }
+.t-tbl td.v { font-family: var(--mono); white-space: nowrap; text-align: right; }
+.t-tbl tr:last-child td { border-bottom: 0; }
+.t-live { border: 1px solid var(--line); border-radius: 10px; padding: 7px 9px; margin: 8px 0 4px; background: var(--panel); }
+.t-live .t-lh { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 650; }
+.t-live .t-lh i { font-style: normal; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--bad); margin-right: 5px; animation: t-rec 1.2s infinite; }
+@keyframes t-rec { 50% { opacity: .25; } }
+.t-state { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); text-transform: uppercase; letter-spacing: .05em; }
+.t-state.ok { color: var(--ok); border-color: var(--ok); } .t-state.warn { color: var(--warn); border-color: var(--warn); } .t-state.bad { color: var(--bad); border-color: var(--bad); } .t-state.off { color: var(--muted); }
+.t-acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.t-acts .btn { min-height: 28px; font-size: 12px; padding: 3px 9px; }
+.t-tour { border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line)); border-radius: 10px; padding: 8px 10px; margin-top: 2px; background: color-mix(in srgb, var(--accent) 6%, var(--panel)); }
+.t-tour .t-step { display: flex; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+.t-prog { height: 4px; border-radius: 4px; background: var(--line); overflow: hidden; margin-bottom: 7px; }
+.t-prog b { display: block; height: 100%; background: var(--accent); border-radius: 4px; transition: width .3s ease; }
+.t-tour.done .t-acts { display: none; }
+#t-chips { display: flex; gap: 6px; padding: 8px 12px 4px; overflow-x: auto; scrollbar-width: thin; border-top: 1px solid var(--line); }
+#t-chips button { flex: none; border: 1px solid var(--line); background: var(--panel2); color: var(--fg); border-radius: 999px; padding: 5px 11px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+#t-chips button:hover { border-color: var(--accent); color: var(--accent); }
+#t-chips button.hot { border-color: var(--bad); color: var(--bad); background: color-mix(in srgb, var(--bad) 8%, var(--panel2)); }
+#t-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; padding: 6px 12px 12px; }
+#t-in { min-height: 36px; border-radius: 9px; border: 1px solid var(--line); background: var(--raise); color: var(--fg); padding: 6px 11px; font: inherit; font-size: 13px; }
+#t-in:focus { outline: 2px solid color-mix(in srgb, var(--accent) 55%, transparent); border-color: var(--accent); }
+#t-form .btn { min-height: 36px; }
+#b-tutor[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+#b-tutor { position: relative; }
+#b-tutor::after { content: ''; position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+#b-tutor[aria-pressed="true"]::after { display: none; }
+#viewdock #b-overview { background: color-mix(in srgb, var(--panel) 90%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 4px 16px var(--shadow); font-size: 12.5px; min-height: 30px; }
+#viewdock #b-overview[hidden] { display: none; }
+#inspector .t-insp { width: 100%; margin: 8px 0 4px; min-height: 36px; font-weight: 650; border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--panel2)); }
+#inspector .t-insp:hover { background: var(--accent); color: var(--accent-fg); }
+@media (max-width: 760px) { #tutor { left: 8px; right: 8px; width: auto; bottom: 8px; height: 62vh; } }
+@media (prefers-reduced-motion: reduce) { .t-msg, .t-typing i, .t-live .t-lh i { animation: none; } #t-msgs { scroll-behavior: auto; } }
+.t-tbl td:nth-child(2) { font-size: 11.5px; min-width: 96px; }
+.t-tbl td:last-child .comp-ref { font-size: 10.5px; }

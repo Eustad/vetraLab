@@ -1,0 +1,8 @@
+/* ---------- v15 · marca VectraLab 3D ---------- */
+.vl-logo { width: 30px; height: 30px; flex: none; filter: drop-shadow(0 1px 3px rgba(0,0,0,.35)) drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 22%, transparent)); }
+#top .brand .vl-logo { width: 30px; height: 30px; }
+#brand-name { cursor: text; border-radius: 4px; outline: none; padding: 0 2px; margin: 0 -2px; background-image: linear-gradient(90deg, var(--fg), color-mix(in srgb, var(--fg) 70%, var(--ch2))); -webkit-background-clip: text; background-clip: text; }
+#brand-name.edit { -webkit-text-fill-color: var(--fg); background: var(--raise); box-shadow: 0 0 0 2px var(--accent); }
+#startmenu .sm-head i.sm-logo { background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--accent) 22%, var(--panel2)), var(--panel)); border: 1px solid var(--line); width: 52px; height: 52px; border-radius: 14px; box-shadow: 0 6px 18px var(--shadow); }
+#startmenu .sm-head i.sm-logo .vl-logo { width: 40px; height: 40px; }
+#startmenu .sm-brand { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }

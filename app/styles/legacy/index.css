@@ -1,0 +1,21 @@
+/* Estilos del monolito divididos por sección (mismo orden de cascada). Generado por tools/extract.mjs */
+@import url("./00-base-y-tokens.css");
+@import url("./01-barra-superior.css");
+@import url("./02-paleta.css");
+@import url("./03-escena.css");
+@import url("./04-pantalla-del-osciloscopio-siempre-oscura.css");
+@import url("./05-inspector.css");
+@import url("./06-tutor-de-laboratorio.css");
+@import url("./07-marca-vectralab-3d.css");
+@import url("./08-ventana-de-proteus.css");
+@import url("./09-paleta-con-subcategorias-favoritos-y-rec.css");
+@import url("./10-ventana-pick-devices.css");
+@import url("./11-auto-stub-de-proteus-e-inspector.css");
+@import url("./12-proteus-escaneo-dsn-remapeo-de-pines-y-e.css");
+@import url("./13-resolucion-de-modelos-lod-paquetes-3d-y-.css");
+@import url("./14-cabecera-de-aplicacion.css");
+@import url("./15-barra-de-actividad-rail.css");
+@import url("./16-panel-lateral-unificado.css");
+@import url("./17-editor-acoplado-split.css");
+@import url("./18-barra-de-estado-tipo-ide.css");
+@import url("./19-toasts-con-diagnostico.css");

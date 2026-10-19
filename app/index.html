@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VectraLab 3D · arquitectura modular</title>
+<link rel="stylesheet" href="./styles/tokens.css">
+<link rel="stylesheet" href="./styles/app.css">
+<script type="importmap">{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+  "three-mesh-bvh": "https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.7.8/build/index.module.js"
+} }</script>
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <b class="brand">VectraLab 3D</b><span class="tag">arquitectura modular</span>
+    <label class="pick">Práctica <select id="scenario" aria-label="Práctica"></select></label>
+  </header>
+  <main class="stage"><vl-viewport aria-label="Escena 3D del laboratorio"></vl-viewport></main>
+  <aside class="side">
+    <vl-inspector></vl-inspector>
+    <vl-tutor></vl-tutor>
+  </aside>
+  <section class="dock" aria-label="Instrumentos y programa">
+    <nav role="tablist">
+      <button role="tab" data-dock="scope" aria-selected="true">Osciloscopio</button>
+      <button role="tab" data-dock="editor" aria-selected="false">Programa</button>
+      <button role="tab" data-dock="serial" aria-selected="false">Monitor serie</button>
+    </nav>
+    <vl-scope-hud data-panel="scope"></vl-scope-hud>
+    <vl-code-editor data-panel="editor" hidden></vl-code-editor>
+    <vl-serial-console data-panel="serial" hidden></vl-serial-console>
+  </section>
+  <vl-status-bar class="stat"></vl-status-bar>
+</div>
+<script type="module" src="./src/app.js"></script>
+</body>
+</html>

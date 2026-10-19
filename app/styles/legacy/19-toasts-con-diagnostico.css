@@ -1,0 +1,20 @@
+/* ---------- toasts con diagnóstico ---------- */
+.toast .t-diag { margin-top: 7px; display: inline-flex; min-height: 28px; font-size: 12px; padding: 3px 10px; border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--panel2)); }
+.toast .t-diag:hover { background: var(--accent); color: var(--accent-fg); }
+
+@media (max-width: 900px) {
+  #app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto 62vh auto auto auto auto; grid-template-areas: "top" "rail" "stage" "ed" "insp" "pal" "stat"; }
+  #rail { flex-direction: row; justify-content: center; padding: 4px; border-right: 0; border-bottom: 1px solid var(--line); }
+  #rail .sp { display: none; }
+  #rail .rb[aria-pressed="true"]::before { left: 9px; right: 9px; top: auto; bottom: -4px; width: auto; height: 3px; }
+  #sidebar { border-right: 0; border-top: 1px solid var(--line); max-height: 70vh; }
+  #editor { border-left: 0; border-top: 1px solid var(--line); height: 60vh; }
+  #top .t-left, #top .t-right { flex: none; }
+}
+@media (prefers-reduced-motion: reduce) { #app { transition: none; } }
+#sidebar #t-head { padding: 7px 10px; gap: 7px; }
+#sidebar #t-head .t-tt b { display: none; }
+#sidebar #t-head .t-ico { width: 24px; height: 24px; border-radius: 7px; }
+#sidebar #t-head .t-ico svg { width: 15px; height: 15px; }
+#sidebar #tutor .t-bar { padding: 7px 10px; }
+#sidebar #tutor .t-bar .btn { flex: 1 1 auto; }

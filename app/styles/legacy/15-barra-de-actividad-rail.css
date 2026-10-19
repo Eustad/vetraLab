@@ -1,0 +1,16 @@
+/* ---------- barra de actividad (rail) ---------- */
+#rail { grid-area: rail; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 0; background: color-mix(in srgb, var(--panel2) 70%, var(--bg)); border-right: 1px solid var(--line); z-index: 2; }
+#rail .rb { position: relative; width: 40px; height: 44px; border-radius: 10px; border: 0; background: transparent; color: var(--muted); display: grid; place-items: center; align-content: center; gap: 2px; padding: 0; }
+#rail .rb svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+#rail .rb span { font-size: 8.5px; font-weight: 650; letter-spacing: .02em; line-height: 1; font-stretch: 85%; }
+#rail .rb:hover { color: var(--fg); background: var(--panel); }
+#rail .rb[aria-pressed="true"] { color: var(--accent); background: var(--panel); }
+#rail .rb[aria-pressed="true"]::before { content: ''; position: absolute; left: -5px; top: 9px; bottom: 9px; width: 3px; border-radius: 0 3px 3px 0; background: var(--accent); }
+#app.pal-off #rail .rb[aria-pressed="true"] { background: transparent; }
+#app.pal-off #rail .rb[aria-pressed="true"]::before { opacity: .35; }
+#rail .rb .dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+#rail .rb .dot.bad { background: var(--bad); box-shadow: 0 0 6px var(--bad); }
+#rail .sp { flex: 1; }
+#rail .ibtn { width: 36px; height: 36px; background: transparent; border-color: transparent; }
+#rail .ibtn:hover { background: var(--panel); }
+

@@ -1,0 +1,7 @@
+/* ---------- barra de estado tipo IDE ---------- */
+#stat { padding: 4px 12px; gap: 4px 14px; font-size: 12px; }
+#stat .st-r { display: inline-flex; align-items: center; gap: 6px; padding: 1px 8px; border-radius: 6px; color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+#stat .st-r b { color: var(--fg); font-weight: 600; }
+#stat #st-prac { max-width: 340px; overflow: hidden; text-overflow: ellipsis; }
+#stat #st-eng.on b { color: var(--ok); } #stat #st-eng.pause b { color: var(--warn); } #stat #st-eng.err b { color: var(--bad); }
+

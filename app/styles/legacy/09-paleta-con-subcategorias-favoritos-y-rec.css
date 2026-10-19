@@ -1,0 +1,24 @@
+/* ---------- v16 · paleta con subcategorías, favoritos y recientes ---------- */
+.pal-head .seg { grid-template-columns: repeat(5, 1fr); }
+.pal-head .pk-open { justify-content: center; gap: 6px; font-weight: 620; border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: color-mix(in srgb, var(--accent) 9%, var(--raise)); }
+.pal-head .pk-open kbd { margin-left: 2px; }
+#pal[data-view="prac"] .pal-head .pk-open { display: none; }
+.pal-quick { display: grid; gap: 6px; margin-bottom: 12px; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel2); }
+.pq-row { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.pq-l { font-size: 11px; font-weight: 650; color: var(--muted); margin-right: 2px; white-space: nowrap; }
+.pal-chip { font: 600 11.5px var(--mono); padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line2); background: var(--raise); color: var(--fg); cursor: grab; touch-action: none; }
+.pal-chip:hover { border-color: var(--accent); color: var(--accent); }
+details.pacc { border: 1px solid var(--line); border-radius: 10px; margin-bottom: 8px; background: color-mix(in srgb, var(--panel2) 55%, transparent); }
+details.pacc > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: 12px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); font-stretch: 88%; border-radius: 10px; }
+details.pacc > summary::-webkit-details-marker { display: none; }
+details.pacc > summary::before { content: '▸'; font-size: 11px; transition: transform .15s; color: var(--accent); }
+details.pacc[open] > summary::before { transform: rotate(90deg); }
+details.pacc > summary span { flex: 1; }
+details.pacc > summary em { font-style: normal; font-family: var(--mono); font-size: 11px; color: var(--fg); background: var(--raise); border: 1px solid var(--line); padding: 0 7px; border-radius: 999px; }
+details.pacc > summary:hover { color: var(--fg); }
+details.pacc > .pal-grid { padding: 2px 8px 10px; }
+.pal-fav { position: absolute; top: 4px; right: 5px; z-index: 1; border: 0; background: none; padding: 2px 3px; font-size: 14px; line-height: 1; color: var(--muted); cursor: pointer; opacity: .55; border-radius: 5px; }
+.pal-item:hover .pal-fav, .pal-fav:focus-visible { opacity: 1; }
+.pal-fav.on { color: #f5b301; opacity: 1; }
+.pal-fav:hover { background: var(--panel2); }
+.linkbtn { border: 0; background: none; color: var(--accent); font: inherit; font-weight: 650; cursor: pointer; padding: 0; text-decoration: underline; }

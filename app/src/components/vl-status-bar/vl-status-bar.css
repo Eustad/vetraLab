@@ -1,0 +1,11 @@
+:host { display: block; }
+footer { display: flex; align-items: center; gap: 10px; padding: 5px 12px; border-top: 1px solid var(--line); background: var(--panel); font-size: 12.5px; }
+.led { width: 9px; height: 9px; border-radius: 50%; background: var(--faint); }
+.led.ok { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+.led.warn { background: var(--warn); }
+.led.bad { background: var(--bad); box-shadow: 0 0 8px var(--bad); animation: blink 1s steps(2) infinite; }
+.time { font: 12px var(--mono); color: var(--muted); }
+.sp { flex: 1; }
+button { background: var(--raise); border: 1px solid var(--line); border-radius: 6px; padding: 3px 10px; }
+@keyframes blink { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .led.bad { animation: none; } }

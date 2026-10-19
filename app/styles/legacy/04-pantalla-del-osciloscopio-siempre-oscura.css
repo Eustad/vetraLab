@@ -1,0 +1,22 @@
+/* ---------- pantalla del osciloscopio (siempre oscura, como el instrumento) ---------- */
+#scopehud { position: absolute; right: 12px; bottom: 12px; width: min(440px, calc(100% - 24px)); background: #0c0f0e; color: #cfe3d8; border: 1px solid #27302c; border-radius: 12px; box-shadow: 0 12px 34px rgba(0,0,0,.45); overflow: hidden; z-index: 3; }
+#scopehud header { display: flex; align-items: center; gap: 8px; padding: 7px 8px 7px 12px; border-bottom: 1px solid #1f2724; cursor: pointer; user-select: none; }
+#scopehud header b { font-family: var(--mono); font-size: 12px; font-weight: 600; color: #e9f5ee; }
+#scopehud header .lbl { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #7d9389; font-stretch: 85%; font-weight: 600; }
+#scopehud .tag { font-family: var(--mono); font-size: 10.5px; padding: 1px 6px; border-radius: 4px; border: 1px solid currentColor; }
+#scopehud .hb { width: 26px; height: 26px; border-radius: 6px; border: 1px solid #2a3430; background: #141917; color: #cfe3d8; display: grid; place-items: center; }
+#scopehud .hb:hover { border-color: #ffb36b; }
+#scopehud canvas { display: block; width: 100%; height: auto; }
+#scopehud.min canvas, #scopehud.min .hud-ctl { display: none; }
+.hud-ctl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 8px; border-top: 1px solid #1f2724; }
+.hud-ctl .k { display: grid; grid-template-columns: 24px 1fr 24px; align-items: center; background: #141917; border: 1px solid #242d29; border-radius: 7px; overflow: hidden; }
+.hud-ctl .k button { height: 28px; border: 0; background: transparent; color: #cfe3d8; font-weight: 700; }
+.hud-ctl .k button:hover { background: #1d2421; color: #fff; }
+.hud-ctl .k div { text-align: center; line-height: 1.05; }
+.hud-ctl .k small { display: block; font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; color: #7d9389; font-weight: 600; }
+.hud-ctl .k output { font-family: var(--mono); font-size: 12px; }
+.hud-ctl .k.c1 small { color: #ffd43b; } .hud-ctl .k.c2 small { color: #3bc9db; }
+.hud-ctl .wide { grid-column: span 3; display: flex; gap: 6px; }
+.hud-ctl .wide button { flex: 1; height: 28px; border-radius: 7px; border: 1px solid #2a3430; background: #141917; color: #cfe3d8; font-weight: 600; font-size: 12.5px; }
+.hud-ctl .wide button:hover { border-color: #ffb36b; }
+

@@ -1,0 +1,14 @@
+:host { display: block; min-height: 0; }
+section { display: flex; flex-direction: column; height: 100%; gap: 6px; }
+header { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+.chip { font-family: var(--mono); }
+.dirty { color: var(--warn); font-size: 12px; }
+.sp { flex: 1; }
+.upload { background: var(--accent); color: var(--accent-fg); border: 1px solid var(--accent); border-radius: 7px; padding: 5px 10px; font-weight: 600; }
+.upload:disabled { opacity: .45; cursor: default; }
+.code { display: grid; grid-template-columns: auto 1fr; flex: 1; min-height: 180px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--raise); }
+.gutter, textarea { font: 12.5px/1.55 var(--mono); padding: 8px; margin: 0; }
+.gutter { color: var(--faint); text-align: right; background: var(--panel2); overflow: hidden; user-select: none; min-width: 3.2em; }
+textarea { border: 0; resize: none; outline: none; background: transparent; white-space: pre; overflow: auto; tab-size: 2; }
+.status { margin: 0; min-height: 1.3em; font-size: 12.5px; color: var(--muted); }
+.status.ok { color: var(--ok); } .status.bad { color: var(--bad); }

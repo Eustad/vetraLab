@@ -1,0 +1,15 @@
+:host { display: block; min-height: 0; }
+section { display: flex; flex-direction: column; height: 100%; gap: 8px; }
+header { display: flex; align-items: center; justify-content: space-between; }
+.log { list-style: none; margin: 0; padding: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; flex: 1; min-height: 120px; }
+li { padding: 7px 9px; border-radius: 8px; font-size: 13px; line-height: 1.4; max-width: 92%; }
+li.tutor { background: var(--panel2); border-left: 3px solid var(--line2); }
+li.tutor.bad { border-left-color: var(--bad); }
+li.tutor.ok { border-left-color: var(--ok); }
+li.user { align-self: flex-end; background: var(--accent); color: var(--accent-fg); }
+li.hint { color: var(--muted); background: none; }
+li button { margin-left: 6px; font-size: 12px; }
+form { display: flex; gap: 6px; }
+input { flex: 1; min-width: 0; padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; background: var(--raise); }
+button { background: var(--raise); border: 1px solid var(--line); border-radius: 7px; padding: 5px 10px; }
+button[type="submit"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
