@@ -5,6 +5,12 @@ Simulador de circuitos electrónicos en 3D en un solo archivo HTML (three.js + m
 ## Abrir
 Abre `index.html` en Chrome o Edge (necesita internet la primera vez para cargar three.js y las bibliotecas CAD desde CDN).
 
+## Versión 22
+- Biblioteca de modelos 3D (botón «Modelos» en la barra lateral): 79 modelos a escala 1:1 del banco de módulos Arduino/ESP32 y del banco de capacitores, con visor propio (órbita, iluminación de estudio, cotas en mm) y búsqueda. «Colocar en la mesa» añade el modelo como pieza de referencia (no participa en la simulación) con su huella real.
+- Los electrolíticos y cerámicos de la protoboard usan los modelos del banco de capacitores: tamaño según µF y tensión, franja (−) hacia el borne negativo y código EIA en los cerámicos (calidad Ultra y Media).
+- Interfaz rediseñada: superficies neutras, un solo acento azul, tipografía IBM Plex, monograma plano en lugar del logo, botón de simulación con punto de estado y sin brillos neón; temas claro y oscuro.
+- Corrección en el banco de módulos: la lente Fresnel del PIR usaba un degradado con radio negativo y fallaba al generarse.
+
 ## Versión 21.2
 - Cables entre agujeros ruteados con A* ortogonal en 3D (src/wire-router.js): salen verticales del agujero, viajan pegados a la protoboard (0,85 mm) esquivando patas y cuerpos de las piezas, giran en 90° con codos redondeados y solo suben una capa (1,6 mm) para cruzar otro cable; no se enciman.
 - Los obstáculos siguen la forma real de cada pieza (patas, cuerpo, cúpula del LED), así el cable puede pasar bajo los cuerpos elevados como en un montaje real.
