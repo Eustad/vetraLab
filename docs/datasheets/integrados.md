@@ -2,7 +2,7 @@
 
 Una ficha por circuito integrado DIP del simulador.
 
-> Las patas y los rangos de esta ficha son los que usa VectraLab 22 al simular. Para diseñar un circuito real manda siempre el datasheet del fabricante.
+> Las patas y los rangos de esta ficha son los que usa VectraLab 23 al simular. Para diseñar un circuito real manda siempre el datasheet del fabricante.
 
 ## Controladores
 

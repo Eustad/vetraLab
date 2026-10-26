@@ -1,6 +1,6 @@
 # Datasheets
 
-Fichas de los 136 componentes de VectraLab 22 con el enlace a su datasheet oficial (95 con enlace).
+Fichas de los 136 componentes de VectraLab 23 con el enlace a su datasheet oficial (95 con enlace).
 
 - [Integrados](integrados.md)
 - [Microcontroladores y placas](microcontroladores.md)

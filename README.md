@@ -5,6 +5,15 @@ Simulador de circuitos electrónicos en 3D en un solo archivo HTML (three.js + m
 ## Abrir
 Abre `index.html` en Chrome o Edge (necesita internet la primera vez para cargar three.js y las bibliotecas CAD desde CDN).
 
+## Versión 23
+- Una sola hoja de estilo: se fusionaron la hoja base (con los parches de v13 a v17) y el tema de v22, sin reglas anuladas ni selectores repetidos en `:root`, `body`, `#app`, `#top`, `#rail`, `.btn`, `.ibtn` y `.seg`. Se comprobó elemento por elemento que el resultado calcula los mismos estilos que v22 (escritorio y móvil, temas claro y oscuro, con editor, Pick Devices y guía abiertos). Los 7 `!important` que quedan son necesarios: le ganan a estilos en línea que pone el JavaScript, o son la regla global de `[hidden]` y las de movimiento reducido.
+- Solo IBM Plex Sans y Plex Mono, en una sola petición. Las texturas 3D que escribían con Archivo o JetBrains Mono ahora usan Plex, y el arranque espera a que carguen sus pesos (hasta 2,5 s sin red).
+- Editor: resaltado de sintaxis para C/Arduino, MicroPython, ensamblador PIC/AVR (registros como `TRISB`, `PORTB`, `LATB`, `r16`) e Intel HEX. Cuando el ensamblador, el HEX o Python reportan «línea N», esa línea se marca en el código y en la numeración.
+- Ventanas flotantes (guía, tutor, osciloscopio, luz): la que pulsas pasa al frente, y al arrastrarlas la cabecera nunca sale de la pantalla (el osciloscopio, de la escena).
+- Tablet y móvil (≤ 900 px): sin scroll de página; la escena ocupa la pantalla. El panel lateral es un cajón que se abre desde el rail, y el inspector y el editor son hojas inferiores. El fondo oscuro, Esc o deslizar cierran el panel y el inspector.
+- Divisores con agarre visible; los controles de vista quedan por encima de ellos.
+- Pick Devices: diagramas DIP con espacio para todas las etiquetas (sin recortes en DIP-40), zoom con la rueda o los botones, arrastre para moverse y doble clic para ajustar.
+
 ## Versión 22
 - Biblioteca de modelos 3D (botón «Modelos» en la barra lateral): 79 modelos a escala 1:1 del banco de módulos Arduino/ESP32 y del banco de capacitores, con visor propio (órbita, iluminación de estudio, cotas en mm) y búsqueda. «Colocar en la mesa» añade el modelo como pieza de referencia (no participa en la simulación) con su huella real.
 - Los electrolíticos y cerámicos de la protoboard usan los modelos del banco de capacitores: tamaño según µF y tensión, franja (−) hacia el borne negativo y código EIA en los cerámicos (calidad Ultra y Media).
