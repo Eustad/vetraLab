@@ -14194,10 +14194,20 @@ buildObj = function (c) {
   if ((c.type === 'capacitor' || c.type === 'ceramic') && LOD.level <= 2 && window.VL_CAD) {
     const tpl = cadTpl(capCadKey(c));
     if (tpl) {
-      o.group.children.slice().forEach(ch => { if (ch.isMesh && !ch.userData.term) ch.visible = false; });
+      const legacy = o.group.children.filter(ch => ch.isMesh && !ch.userData.term);
+      legacy.forEach(ch => { ch.visible = false; });
       const m = tpl.clone(true);
       if (c.type === 'capacitor') m.rotation.y = Math.PI;            /* franja (−) del modelo hacia la pata − de la placa (+X) */
       m.userData.capCad = true; o.group.add(m);
+      /* el update del modelo simple vuelve a mostrar franja y cruz de la tapa en cada cuadro: el CAD manda salvo si el capacitor reventó */
+      const up = o.update;
+      o.update = s => {
+        if (up) up(s);
+        const failed = !!(s && s.failed), d = s ? s.damage || 0 : 0;
+        m.visible = !failed;
+        if (!failed) legacy.forEach(ch => { ch.visible = false; });
+        m.scale.set(1 + 0.1 * d, 1, 1 + 0.1 * d);
+      };
     }
   }
   return o;
