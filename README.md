@@ -9,6 +9,7 @@ Abre `index.html` en Chrome o Edge (necesita internet la primera vez para cargar
 - Biblioteca de modelos 3D (botón «Modelos» en la barra lateral): 79 modelos a escala 1:1 del banco de módulos Arduino/ESP32 y del banco de capacitores, con visor propio (órbita, iluminación de estudio, cotas en mm) y búsqueda. «Colocar en la mesa» añade el modelo como pieza de referencia (no participa en la simulación) con su huella real.
 - Los electrolíticos y cerámicos de la protoboard usan los modelos del banco de capacitores: tamaño según µF y tensión, franja (−) hacia el borne negativo y código EIA en los cerámicos (calidad Ultra y Media).
 - Interfaz rediseñada: superficies neutras, un solo acento azul, tipografía IBM Plex, monograma plano en lugar del logo, botón de simulación con punto de estado y sin brillos neón; temas claro y oscuro.
+- Datasheets: docs/datasheets/ tiene una ficha por componente (patas, alimentación que usa el simulador y enlace comprobado al datasheet oficial del fabricante). Se regeneran con `node tools/gen-ds.js index.html docs/datasheets`.
 - Corregido: la franja y la cruz de la tapa del electrolítico simple reaparecían flotando sobre el modelo CAD; ahora el CAD se hincha con el daño y, si el capacitor revienta, se muestra el modelo reventado.
 - Corrección en el banco de módulos: la lente Fresnel del PIR usaba un degradado con radio negativo y fallaba al generarse.
 
@@ -52,4 +53,5 @@ Abre `index.html` en Chrome o Edge (necesita internet la primera vez para cargar
 - Cámara 360°, giro de equipos de mesa, cables en abanico y elección automática de 1, 2 o 3 protoboards.
 
 ## Documentación
+- [`docs/datasheets/`](docs/datasheets/README.md): una ficha por componente con su enlace al datasheet oficial del fabricante.
 - [`docs/pinouts.md`](docs/pinouts.md): pinouts de integrados, microcontroladores y módulos, generados desde las definiciones del simulador (son las patas que VectraLab usa al conectar).
