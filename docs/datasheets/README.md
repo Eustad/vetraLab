@@ -1,12 +1,12 @@
 # Datasheets
 
-Fichas de los 136 componentes de VectraLab 23 con el enlace a su datasheet oficial (95 con enlace).
+Fichas de los 136 componentes de VectraLab 24 con el enlace a su datasheet oficial (95 con enlace).
 
 - [Integrados](integrados.md)
 - [Microcontroladores y placas](microcontroladores.md)
 - [Piezas, módulos e instrumentos](piezas.md)
 
-Los PDF no se copian al repositorio: tienen derechos de autor de cada fabricante y el enlace lleva siempre a la revisión vigente. Cada enlace se comprobó el 2026-10-26. Las piezas genéricas (resistencias, LED, motores de juguete, módulos sin marca) no tienen un datasheet único y su ficha lo explica.
+Los PDF no se copian al repositorio: tienen derechos de autor de cada fabricante y el enlace lleva siempre a la revisión vigente. Cada enlace se comprobó el 2026-10-29. Las piezas genéricas (resistencias, LED, motores de juguete, módulos sin marca) no tienen un datasheet único y su ficha lo explica.
 
 Para regenerar las fichas cuando cambie el simulador: `node tools/gen-ds.js index.html docs/datasheets`; los enlaces están en `tools/ds-links.js`.
 

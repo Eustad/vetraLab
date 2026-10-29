@@ -1115,6 +1115,7 @@ input, select, textarea { border-radius:var(--r-s); }
           <button class="btn" id="b-paste">Cargar</button>
         </div>
         <p class="meta" style="margin:8px 0 0">Copiar exporta el montaje como texto; Cargar lo restaura desde texto o archivo.</p>
+        <div class="row" style="margin-top:8px"><button class="btn" id="b-recover" hidden style="flex:1">↺ Recuperar el proyecto anterior</button></div>
         <div class="row" style="margin-top:10px"><button class="btn primary" id="b-proteus2">🔌 Importar / Conectar Proteus</button><button class="btn" id="b-sdf">Exportar netlist (.sdf)</button></div>
       </div>
       <h3>Atajos</h3>
@@ -1151,7 +1152,7 @@ input, select, textarea { border-radius:var(--r-s); }
         <div class="wide"><button id="hud-run">Detener</button><button id="hud-auto">Autoajuste</button></div>
       </div>
     </section>
-    <div id="startmenu" role="dialog" aria-modal="true" aria-labelledby="sm-title">
+    <div id="startmenu" hidden role="dialog" aria-modal="true" aria-labelledby="sm-title">
       <div class="sm-card">
         <div class="sm-head"><i class="sm-logo"><svg class="vl-mark vl-logo" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6.6 8.2l3.4 7.6 3.4-7.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.6 8.2v7.6h2.9" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></i><div><small class="sm-brand">VectraLab 3D · EDA · Micros · Robótica</small><h2 id="sm-title">¿Qué laboratorio vas a trabajar hoy?</h2><p>Elige una materia y el simulador se prepara con las piezas, prácticas y guías que vas a usar. Puedes cambiar cuando quieras con el botón de inicio.</p></div></div>
         <div class="sm-grid">
@@ -11411,6 +11412,7 @@ setTimeout(function initShell() {
   let nav = 'cat'; try { nav = localStorage.getItem('lab3d-nav') || $('#pal').dataset.view || 'cat'; } catch (e) { /* sin almacenamiento */ }
   if (nav === 'guide' && !fg) { $('#guide').hidden = false; renderGuide(guideKey || 'p1'); }
   setNav(NAV_NAMES[nav] ? nav : 'cat', true);
+  PANES.palOff = true;
   applyPanes();
   shellTick();
   setInterval(shellTick, 800);
@@ -14570,6 +14572,36 @@ function pkZoom(svg) {
 const pkSide22 = pkSide;
 pkSide = function () { pkSide22(); const svg = $('#pk-side .pk-svg'); if (svg) pkZoom(svg); };
 
+/* ================= v24 · arranque limpio ================= */
+const PREV_KEY = 'vectralab_anterior';
+/* los paneles empiezan cerrados y la vista en la protoboard; la guía y el tutor no se abren solos */
+PANES.palOff = true; PANES.inspOff = true;
+try { localStorage.setItem('lab3d-nav', 'cat'); localStorage.setItem('lab3d.vista', 'proto'); } catch (e) { /* sin almacenamiento */ }
+/* el inspector se abre solo la primera vez que seleccionas una pieza; si después lo cierras, se respeta */
+let inspAuto = true;
+new MutationObserver(() => {
+  if (!inspAuto || $('#inspector').classList.contains('empty')) return;
+  inspAuto = false; if (PANES.inspOff && !matchMedia('(max-width: 900px)').matches) { PANES.inspOff = false; applyPanes(); }
+}).observe($('#inspector'), { attributes: true, attributeFilter: ['class'] });
+$('#b-insp').addEventListener('click', () => { inspAuto = false; }, true);
+function prevProject() { try { const t = localStorage.getItem(PREV_KEY); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
+function syncRecover() { const p = prevProject(), b = $('#b-recover'); if (b) { b.hidden = !p; if (p) b.title = 'Restaura el montaje de la sesión anterior (' + p.components.length + ' piezas)'; } }
+function recoverPrev() {
+  const t = (() => { try { return localStorage.getItem(PREV_KEY); } catch (e) { return null; } })(); if (!t) return;
+  try { loadProject(sanitize(JSON.parse(t)), 'Proyecto anterior recuperado.'); } catch (e) { toast('No se pudo recuperar el proyecto anterior.', 'warn'); }
+}
+function offerRecover() {
+  const p = prevProject(); if (!p) return;
+  /* aviso propio con 15 s de vida (los avisos informativos duran 5 s); el botón también está en Ajustes › Proyecto */
+  const t = document.createElement('div'); t.className = 'toast info';
+  t.textContent = 'Empiezas con la protoboard vacía. Tu montaje anterior (' + p.components.length + ' piezas) quedó guardado.';
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'btn t-diag'; b.textContent = '↺ Recuperarlo';
+  b.addEventListener('click', () => { t.remove(); recoverPrev(); });
+  t.appendChild(document.createElement('br')); t.appendChild(b); $('#toasts').appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 400); }, 15000);
+}
+$('#b-recover').addEventListener('click', recoverPrev);
+
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
@@ -14666,7 +14698,9 @@ function boot() {
   if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
   let saved = null;
   try { saved = localStorage.getItem('vectralab_autosave_v21') || localStorage.getItem('lab3d.proyecto.v2') || localStorage.getItem('lab3d.proyecto.v1'); } catch (e) { /* sin almacenamiento */ }
-  try { S.project = saved ? sanitize(JSON.parse(saved)) : Lab.scenarios.base(); } catch (e) { S.project = Lab.scenarios.base(); }
+  S.project = Lab.newProject();
+  try { const prev = saved ? sanitize(JSON.parse(saved)) : null; if (prev) { S.project.board = Object.assign({}, prev.board); if (prev.components.length) { localStorage.setItem(PREV_KEY, saved); setTimeout(offerRecover, 1200); } } } catch (e) { /* sin almacenamiento o proyecto dañado */ }
+  syncRecover();
   S.hudMin = stage.clientWidth < 640;
   ensureBoards(); rebuildScene(); renderInspector(); syncButtons(); syncBoardUI(); syncHud(); renderPalette(); setMode('select'); resize();
   let vm = 'proto'; try { vm = localStorage.getItem('lab3d.vista') === 'bench' ? 'bench' : 'proto'; } catch (e) { /* sin almacenamiento */ }

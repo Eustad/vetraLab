@@ -2,7 +2,7 @@
 
 Microcontroladores que el simulador programa (C de Arduino, ensamblador o .HEX).
 
-> Las patas y los rangos de esta ficha son los que usa VectraLab 23 al simular. Para diseñar un circuito real manda siempre el datasheet del fabricante.
+> Las patas y los rangos de esta ficha son los que usa VectraLab 24 al simular. Para diseñar un circuito real manda siempre el datasheet del fabricante.
 
 ## ESP32 DevKit V1 (30 pines)
 

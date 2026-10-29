@@ -5,6 +5,12 @@ Simulador de circuitos electrónicos en 3D en un solo archivo HTML (three.js + m
 ## Abrir
 Abre `index.html` en Chrome o Edge (necesita internet la primera vez para cargar three.js y las bibliotecas CAD desde CDN).
 
+## Versión 24
+- Arranque limpio: ya no aparece el menú de materias al entrar (sigue en el botón de inicio, en la insignia de materia y con la tecla Inicio).
+- Se empieza con la protoboard vacía, en la vista de protoboard y con el mismo tamaño de placa que se usaba.
+- El panel lateral, el inspector, la guía, el tutor, el osciloscopio y el editor empiezan ocultos. El panel se abre desde la barra lateral; el inspector se abre solo la primera vez que seleccionas una pieza.
+- El montaje de la sesión anterior no se pierde: al entrar aparece un aviso con «Recuperarlo», y el botón también está en Ajustes › Proyecto.
+
 ## Versión 23
 - Una sola hoja de estilo: se fusionaron la hoja base (con los parches de v13 a v17) y el tema de v22, sin reglas anuladas ni selectores repetidos en `:root`, `body`, `#app`, `#top`, `#rail`, `.btn`, `.ibtn` y `.seg`. Se comprobó elemento por elemento que el resultado calcula los mismos estilos que v22 (escritorio y móvil, temas claro y oscuro, con editor, Pick Devices y guía abiertos). Los 7 `!important` que quedan son necesarios: le ganan a estilos en línea que pone el JavaScript, o son la regla global de `[hidden]` y las de movimiento reducido.
 - Solo IBM Plex Sans y Plex Mono, en una sola petición. Las texturas 3D que escribían con Archivo o JetBrains Mono ahora usan Plex, y el arranque espera a que carguen sus pesos (hasta 2,5 s sin red).
