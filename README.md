@@ -5,6 +5,15 @@ Simulador de circuitos electrónicos en 3D en un solo archivo HTML (three.js + m
 ## Abrir
 Abre `index.html` en Chrome o Edge (necesita internet la primera vez para cargar three.js y las bibliotecas CAD desde CDN).
 
+## Versión 27
+- Nueva práctica «Conformador de señales» (Prácticas › Electrónica II), igual al proyecto de Proteus. Incluye:
+  - fuente de ±12 V y LM324;
+  - detector de cruce por cero;
+  - integrador asimétrico (R2‖D1, C1) o derivador recortado (C2, R4, D4), elegidos con SW1 y SW2;
+  - comparador con referencia ajustable (RV1, que mide el multímetro) y LED rojo/verde en antiparalelo;
+  - generador y osciloscopio de 4 canales (entrada, cuadrada, señal elegida y salida).
+- La guía explica el circuito, los valores esperados (τ ≈ 0,78 ms, Vref ≈ 2 V, rampa de −11,7 a +5,4 V, picos de +20 V) y cómo reemplazar SW2 por un cable.
+
 ## Versión 26
 - Mover la protoboard: arrastra el asa gris del borde izquierdo de la placa. Piezas y cables la acompañan, la cámara se centra donde esté y no se puede soltar encima de un instrumento ni fuera de la mesa. La posición se guarda con el proyecto.
 - Selección de varios elementos: herramienta «Selección» (tecla M) o Shift+arrastrar sobre un hueco para trazar un recuadro; Ctrl+clic agrega o quita; Ctrl+A selecciona todo. Los cables con un solo extremo dentro del recuadro se estiran al mover el bloque.

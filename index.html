@@ -1102,6 +1102,7 @@ input, select, textarea { border-radius:var(--r-s); }
           <button data-guide="p3"><i class="lab"></i><b>3 · Biestable y monoestable <span class="lvl a">Avanzado</span></b><small>AO con zeners, 10 s con AO y 60 s con 555</small></button>
           <button data-guide="p4"><i class="lab"></i><b>4 · Astables y barrido <span class="lvl a">Avanzado</span></b><small>Astable con AO, rampa, comparador y 555 modulado</small></button>
           <button data-guide="p5"><i class="lab"></i><b>5 · ADC0804 y DAC0808 <span class="lvl a">Avanzado</span></b><small>Conversión, span y aliasing</small></button>
+          <button data-guide="pconf"><i class="lab"></i><b>Conformador de señales <span class="lvl a">Avanzado</span></b><small>Cruce por cero, integrador, derivador y comparador</small></button>
           <button data-guide="p6"><i class="lab"></i><b>6 · Regulador conmutado <span class="lvl a">Avanzado</span></b><small>TL494 y fuente reductora de 5 V / 1 A</small></button>
         </div>
       </details>
@@ -2365,6 +2366,39 @@ function scenarioP3Mono(cascada) {
   return sinRefs(montaje({
     board:{ cols:cascada ? 94 : 63, n:1 }, rails:RAILS_DUAL, parts,
     bench:[PS_DUAL(10), SCOPE({ tb:1, v1:5, v2:5, p1:0, p2:cascada ? -1 : 0 }, { ch1:'Vo', ch2:cascada ? 'O2' : 'Cn', gnd:'gnd' })]
+  }));
+}
+﻿// Conformador de señales (Proteus «Conformador de señales.pdsprj»): detector de cruce por cero, integrador o derivador
+// elegido con SW1/SW2 y comparador de referencia ajustable con LEDs bicolor
+function scenarioConf() {
+  return sinRefs(montaje({
+    rails:RAILS_DUAL,
+    parts:[
+      /* A (pines 1-3): detector de cruce por cero · B (pines 12-14): comparador con referencia RV1 */
+      ['U1', 'ic', 'e', 30, { part:'324' }, { 1:'V01', 2:'nA', 3:'gnd', 4:'vp', 11:'vn', 12:'Vref', 13:'VC', 14:'Vb' }],
+      ['R1', 'resistor', 'j', 27, { R:1000 }, { A:'Vi', B:'nA' }],
+      /* SW1: la onda cuadrada va al integrador (1) o al derivador (2) */
+      ['SW1', 'spdt', 'h', 18, { on:[true, false] }, { 1:'aI', C:'V01', 2:'aD' }],
+      /* integrador asimétrico: carga lenta por R2, descarga rápida por D1 */
+      ['R2', 'resistor', 'g', 14, { R:775 }, { A:'VI2', B:'aI' }],
+      ['D1', 'diode', 'i', 14, {}, { A:'VI2', K:'aI' }],
+      ['C1', 'ceramic', 'j', 13, { C:1e-6 }, { 1:'gnd', 2:'VI2' }],
+      /* derivador: C2–R4, D4 recorta los picos negativos */
+      ['C2', 'ceramic', 'g', 20, { C:1e-6 }, { 1:'aD', 2:'VD' }],
+      ['R4', 'resistor', 'i', 21, { R:775 }, { A:'VD', B:'gnd' }],
+      ['D4', 'diode', 'j', 21, {}, { A:'gnd', K:'VD' }, { flip:true }],
+      /* SW2: elige qué salida llega a la entrada − del comparador (es el cable que se mueve a mano) */
+      ['SW2', 'spdt', 'b', 22, { on:[true, false] }, { 1:'VI2', C:'VC', 2:'VD' }],
+      /* referencia ajustable: 17 % de 12 V ≈ 2 V, como POS=17 en Proteus */
+      ['RV1', 'pot', 'c', 40, { R:1000, pos:0.17 }, { 1:'gnd', W:'Vref', 3:'vp' }],
+      ['R3', 'resistor', 'a', 44, { R:550 }, { A:'Vb', B:'l' }],
+      ['LED1', 'led', 'b', 48, { color:'rojo' }, { A:'l', K:'gnd' }],
+      ['LED2', 'led', 'c', 48, { color:'verde' }, { A:'gnd', K:'l' }, { flip:true }]
+    ],
+    bench:[PS_DUAL(12), ['FG', 'fgen', { wave:'sine', f:400, vpp:2, off:0 }, { out:'Vi', gnd:'gnd' }],
+      ['OSC', 'scope4', { tb:5e-4, ch:[{ on:true, vdiv:0.5, pos:3 }, { on:true, vdiv:10, pos:1 }, { on:true, vdiv:10, pos:-1 }, { on:true, vdiv:10, pos:-3 }], trig:{ src:0, slope:1, level:0, mode:'auto' }, run:true, xy:false, sel:0 },
+        { ch1:'Vi', ch2:'V01', ch3:'VC', ch4:'Vb', gnd:'gnd' }],
+      ['DMM', 'dmm', { mode:'vdc', on:true, beep:true }, { VOHM:'Vref', COM:'gnd' }]]
   }));
 }
 // Práctica 4 — multivibrador astable con AO (ciclo útil por diodos D1/D2 y potenciómetro P)
@@ -5461,7 +5495,7 @@ const api = {
     rcCharge:() => scenarioRCLow('square', 50, 10000, 100e-9, 2e-3), rcInt:() => scenarioRCLow('square', 1000, 10000, 100e-9, 2e-4),
     rcDiff:() => scenarioRCHigh('square', 100, 10000, 100e-9, 1e-3), rc2:scenarioRC2,
     p2lim:scenarioP2Lim, p2dz:scenarioP2Dz, p3bi:scenarioP3Bi, p3bidz:scenarioP3BiDz, p3mono:() => scenarioP3Mono(false), p3casc:() => scenarioP3Mono(true),
-    p4ast:scenarioP4Ast, p4barr:() => scenarioP4Barr('barrido'), p4mod:() => scenarioP4Barr('mod'), p5adc:() => scenarioP5(false), p5alias:() => scenarioP5(true),
+    p4ast:scenarioP4Ast, pconf:scenarioConf, p4barr:() => scenarioP4Barr('barrido'), p4mod:() => scenarioP4Barr('mod'), p5adc:() => scenarioP5(false), p5alias:() => scenarioP5(true),
     p6tl:scenarioP6Tl, p6buck:scenarioP6Buck,
     roboLine:scenarioRoboLine, roboLineAn:scenarioRoboLineAn, roboBal:scenarioRoboBal, roboArm:scenarioRoboArm, roboAvoid:scenarioRoboAvoid, digChase:scenarioDigChase, digAdder:scenarioDigAdder,
     ardBlink:scenarioArdBlink, ardServo:scenarioArdServo, ardLcd:scenarioArdLcd, ardSeg:scenarioArdSeg, bjt:scenarioBjt, tipMotor:scenarioTipMotor, espLcd:scenarioEspLcd, stepper:scenarioStepper, l293:scenarioL293, l298:scenarioL298, pic:scenarioPic },
@@ -9721,6 +9755,22 @@ const GUIDE = {
 <p class="g-note">La simulación con muestreo de 5 kHz corre más lenta que el tiempo real; espera unos segundos a que el osciloscopio se llene.</p>` }
     ]
   },
+  pconf: {
+    t: 'Conformador de señales con LM324',
+    intro: 'Un seno se convierte en onda cuadrada con un <b>detector de cruce por cero</b> (A). La cuadrada pasa por un <b>integrador asimétrico</b> (rampa) o por un <b>derivador</b> (picos), y un segundo comparador (B) la compara con una referencia ajustable. Dos LED en antiparalelo muestran el signo de la salida. Es el mismo circuito del proyecto de Proteus, con alimentación de ±12 V.',
+    obj: ['Convertir un seno en cuadrada con un comparador sin histéresis.', 'Obtener una rampa con un integrador RC de carga y descarga distintas.', 'Obtener picos con un derivador RC recortado por diodo.', 'Generar pulsos de ancho ajustable comparando con una referencia.'],
+    rieles: true,
+    sec: [
+      { h: 'Montaje y mediciones', scn: [['pconf', 'Cargar el conformador']],
+        b: `<p><b>A · Cruce por cero (pines 1-3):</b> IN+ a tierra y el seno entra a IN− por R1 (1 kΩ). Sin realimentación, la salida V01 satura: <b>−Vsat con el seno positivo y +Vsat con el negativo</b> (cuadrada invertida). El LM324 satura asimétrico: el simulador da +10,0 V y −12,0 V.</p>
+<p><b>SW1 y SW2</b> se mueven juntos: en la posición 1 eligen el integrador y en la 2 el derivador. SW2 es el «cable que se mueve»: si lo quitas, la pata 13 va a <b>C1 (+)</b> para el integrador o al nodo <b>C2 (−) · R4 · D4</b> para el derivador, nunca a C2 (+).</p>
+<div class="fx-b">Integrador: τ = R2·C1 = 775 Ω · 1 µF ≈ 0,78 ms (carga lenta por R2, descarga rápida por D1)<br>Derivador: τ = C2·R4 ≈ 0,78 ms · D4 recorta los picos negativos a −0,7 V<br>Referencia: Vref = 12 V · 17 % ≈ 2,0 V (RV1 y el multímetro) · I_LED ≈ (Vsat − 2 V) / 550 Ω ≈ 14 mA</div>
+<p><b>Posición 1 (integrador):</b> VC sube en rampa hasta ≈ +5,4 V y cae de golpe a ≈ −11,7 V. B pone su salida en alto (LED rojo) mientras VC &lt; Vref y en bajo (LED verde) cuando la rampa la supera: con Vref = 2 V la salida está en alto ≈ 82 % del tiempo. Gira <b>RV1</b> para cambiar el ancho de los pulsos; por encima de ≈ 5,4 V la rampa ya no la alcanza y queda siempre en rojo.</p>
+<p><b>Posición 2 (derivador):</b> cada flanco de subida de V01 produce un pico de ≈ +20 V que decae con τ; los flancos de bajada quedan recortados por D4. La salida de B baja (verde) mientras el pico supera Vref, así que los pulsos marcan cada flanco.</p>
+<p>CH1 = entrada (0,5 V/div), CH2 = V01, CH3 = VC y CH4 = salida de B (10 V/div), a 0,5 ms/div como en Proteus. El generador está a 400 Hz y 1 V de pico: si en tu Proteus usaste otra frecuencia, cámbiala y compara.</p>
+<p class="g-note">C1 y C2 están como cerámicos (sin polaridad) porque su voltaje se hace negativo. En Proteus, CAP-POL no se daña con eso, pero un electrolítico real sí: en el montaje físico usa capacitores no polarizados.</p>` }
+    ]
+  },
   p6: {
     t: 'Práctica 6 · Regulador conmutado con TL494',
     intro: 'El <b>TL494</b> genera PWM a frecuencia fija y ajusta el ciclo útil con sus amplificadores de error. Con un transistor, un diodo, una bobina y un capacitor forma un regulador reductor (<b>buck</b>) de 15 V a 5 V / 1 A.',
@@ -10225,9 +10275,10 @@ const SCN_MSG = {
   p5adc: 'ADC0804 → DAC0808. Gira R16 para cambiar la entrada; los LEDs encienden con bit 0. Selecciona el ADC para ver el código.',
   p5alias: 'Seno de 60 Hz muestreado a 5 kHz. Cambia el generador FG a 62 Hz para ver el aliasing (2 Hz).',
   p6tl: 'TL494 a ≈ 20 kHz: CH1 = rampa de CT, CH2 = salida. El ciclo útil cambia con la cuadrada de 200 Hz.',
+  pconf: 'Conformador de señales: CH1 = entrada, CH2 = cuadrada (V01), CH3 = señal elegida (VC), CH4 = salida del comparador. Cambia SW1 y SW2 juntos para pasar de integrador a derivador; gira RV1 para mover la referencia.',
   p6buck: 'Fuente reductora 15 V → 5 V / 1 A con TL494. La simulación es más lenta que el tiempo real: espera unos segundos.'
 };
-const BENCH_SCN = ['p2lim', 'p2dz', 'p3bi', 'p3bidz', 'p3mono', 'p3casc', 'p4ast', 'p4barr', 'p4mod', 'p5adc', 'p5alias', 'p6tl', 'p6buck', 'rc', 'astable', 'rcLow', 'rcHigh', 'rcCharge', 'rcInt', 'rcDiff', 'rc2', 'ardServo', 'stepper', 'l293', 'l298', 'tipMotor', 'espLcd'];
+const BENCH_SCN = ['pconf', 'p2lim', 'p2dz', 'p3bi', 'p3bidz', 'p3mono', 'p3casc', 'p4ast', 'p4barr', 'p4mod', 'p5adc', 'p5alias', 'p6tl', 'p6buck', 'rc', 'astable', 'rcLow', 'rcHigh', 'rcCharge', 'rcInt', 'rcDiff', 'rc2', 'ardServo', 'stepper', 'l293', 'l298', 'tipMotor', 'espLcd'];
 $$('[data-scn]').forEach(b => b.addEventListener('click', () => runScn(b.dataset.scn)));
 $('#b-new').addEventListener('click', () => { const p = Lab.newProject(); p.board = Object.assign({}, S.project.board); loadProject(p, 'Proyecto nuevo y vacío.'); });
 $('#b-copy').addEventListener('click', () => {
