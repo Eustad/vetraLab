@@ -5,6 +5,11 @@ Simulador de circuitos electrónicos en 3D en un solo archivo HTML (three.js + m
 ## Abrir
 Abre `index.html` en Chrome o Edge (necesita internet la primera vez para cargar three.js y las bibliotecas CAD desde CDN).
 
+## Versión 25
+- Potenciómetros e interruptores se pueden mover a mano. Interruptores (DIP, deslizantes, teclas): un clic los acciona y arrastrar mueve la pieza. Perillas: arrastrar las gira; mantener pulsado medio segundo, o Shift+arrastrar, mueve la pieza.
+- Avisos ordenados: máximo 3 a la vista y el más nuevo arriba. Un aviso repetido no se apila: muestra «×N». Los de daño (algo se quemó) no desaparecen solos y tienen botón de cerrar; los de atención duran 10 s y los informativos 6 s. Con el cursor encima no se van. La explicación queda plegada en «¿Por qué?».
+- Registro de avisos: botón «Avisos» en la barra de estado, con un contador de los de daño y atención sin leer y la lista completa de la sesión con hora y explicación. Si hay más de 3 avisos de daño, el resto se ve en «+N avisos más en el registro». «Reiniciar» quita los avisos de daño.
+
 ## Versión 24
 - Arranque limpio: ya no aparece el menú de materias al entrar (sigue en el botón de inicio, en la insignia de materia y con la tecla Inicio).
 - Se empieza con la protoboard vacía, en la vista de protoboard y con el mismo tamaño de placa que se usaba.
