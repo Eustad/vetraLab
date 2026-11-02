@@ -5,6 +5,12 @@ Simulador de circuitos electrónicos en 3D en un solo archivo HTML (three.js + m
 ## Abrir
 Abre `index.html` en Chrome o Edge (necesita internet la primera vez para cargar three.js y las bibliotecas CAD desde CDN).
 
+## Versión 26
+- Mover la protoboard: arrastra el asa gris del borde izquierdo de la placa. Piezas y cables la acompañan, la cámara se centra donde esté y no se puede soltar encima de un instrumento ni fuera de la mesa. La posición se guarda con el proyecto.
+- Selección de varios elementos: herramienta «Selección» (tecla M) o Shift+arrastrar sobre un hueco para trazar un recuadro; Ctrl+clic agrega o quita; Ctrl+A selecciona todo. Los cables con un solo extremo dentro del recuadro se estiran al mover el bloque.
+- Arrastrar la selección mueve el bloque completo, también a otra protoboard unida, con contorno rojo si choca.
+- Copiar y pegar: Ctrl+C, Ctrl+X, Ctrl+V y Ctrl+D (duplicar), o la barra de acciones que aparece al seleccionar. Al pegar, una vista previa sigue al cursor (verde si cabe, rojo si choca) y un clic la coloca; Esc o clic derecho cancela. Las copias reciben nombres nuevos (R2, LED2…) y conservan sus valores, programas y cables internos.
+
 ## Versión 25
 - Potenciómetros e interruptores se pueden mover a mano. Interruptores (DIP, deslizantes, teclas): un clic los acciona y arrastrar mueve la pieza. Perillas: arrastrar las gira; mantener pulsado medio segundo, o Shift+arrastrar, mueve la pieza.
 - Avisos ordenados: máximo 3 a la vista y el más nuevo arriba. Un aviso repetido no se apila: muestra «×N». Los de daño (algo se quemó) no desaparecen solos y tienen botón de cerrar; los de atención duran 10 s y los informativos 6 s. Con el cursor encima no se van. La explicación queda plegada en «¿Por qué?».

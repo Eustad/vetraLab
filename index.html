@@ -928,6 +928,18 @@ input, select, textarea { border-radius:var(--r-s); }
   .toast { width: 100%; }
   #tlog { left: 8px; right: 8px; width: auto; bottom: 76px; }
 }
+/* ---------- recuadro de selección ---------- */
+#marq { position: absolute; z-index: 5; pointer-events: none; border: 1px solid var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); border-radius: 2px; }
+
+/* ---------- barra de acciones de la selección ---------- */
+#msbar { position: absolute; bottom: 64px; left: 50%; transform: translateX(-50%); z-index: 6; display: flex; align-items: center; gap: 4px; padding: 4px 4px 4px 12px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-l); box-shadow: 0 8px 24px var(--shadow); white-space: nowrap; max-width: calc(100% - 24px); overflow-x: auto; }
+#msbar #msbar-n { font-size: 12.5px; font-weight: 500; color: var(--fg); margin-right: 6px; overflow: hidden; text-overflow: ellipsis; }
+#msbar .btn { min-height: 28px; padding: 2px 10px; font-size: 12.5px; }
+#msbar .btn kbd { margin-left: 4px; }
+#msbar .ibtn { width: 28px; height: 28px; }
+#msbar.pasting { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+#msbar.pasting [data-ms="copy"], #msbar.pasting [data-ms="dup"], #msbar.pasting [data-ms="del"] { display: none; }
+@media (max-width: 900px) { #msbar { bottom: 10px; } #msbar .btn kbd { display: none; } }
 </style>
 <script type="importmap">{ "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -963,6 +975,7 @@ input, select, textarea { border-radius:var(--r-s); }
       <div class="seg" role="group" aria-label="Herramienta">
       <button data-mode="select" aria-pressed="true" title="Seleccionar y mover (V)"><svg class="i" viewBox="0 0 24 24"><path d="M5 3l13 8-6 1.5L9.5 19z"/></svg>Mover <kbd>V</kbd></button>
       <button data-mode="cable" aria-pressed="false" title="Unir puntos con cable (C)"><svg class="i" viewBox="0 0 24 24"><path d="M4 18c5 0 3-12 8-12s3 12 8 12"/><circle cx="4" cy="18" r="1.8"/><circle cx="20" cy="18" r="1.8"/></svg>Cable <kbd>C</kbd></button>
+      <button data-mode="area" aria-pressed="false" title="Seleccionar varias piezas y cables con un recuadro (M)"><svg class="i" viewBox="0 0 24 24"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/><path d="M9 9h6v6H9z"/></svg>Selección <kbd>M</kbd></button>
     </div>
       <button class="ibtn" id="b-undo" title="Deshacer (Ctrl+Z)" aria-label="Deshacer"><svg class="i" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 010 11H11"/></svg></button>
       <button class="ibtn" id="b-redo" title="Rehacer (Ctrl+Y)" aria-label="Rehacer"><svg class="i" viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 000 11H13"/></svg></button>
@@ -1180,6 +1193,7 @@ input, select, textarea { border-radius:var(--r-s); }
     <div class="splitter" id="split-l" title="Arrastra para cambiar el ancho del panel izquierdo (doble clic: ocultar/mostrar)"></div>
     <div class="splitter" id="split-r" title="Arrastra para cambiar el ancho del inspector (doble clic: ocultar/mostrar)"></div>
     <div id="toasts" aria-live="polite"></div>
+    <div id="msbar" hidden role="toolbar" aria-label="Acciones de la selección"><span id="msbar-n"></span><button type="button" class="btn" data-ms="copy" title="Copiar (Ctrl+C)">Copiar<kbd>Ctrl C</kbd></button><button type="button" class="btn" data-ms="dup" title="Duplicar (Ctrl+D)">Duplicar</button><button type="button" class="btn" data-ms="paste" title="Pegar (Ctrl+V)">Pegar<kbd>Ctrl V</kbd></button><button type="button" class="btn danger" data-ms="del" title="Eliminar (Supr)">Eliminar</button><button type="button" class="ibtn" data-ms="close" aria-label="Quitar la selección" title="Quitar la selección (Esc)"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div id="tip" hidden></div>
     <p id="hint"></p>
     <section id="scopehud" hidden aria-label="Pantalla del osciloscopio">
@@ -1326,10 +1340,10 @@ const BOARD_SIZES = [
   { cols:17, nombre:'Mini · 17 col.' }, { cols:30, nombre:'Media · 30 col.' }, { cols:47, nombre:'¾ · 47 col.' },
   { cols:63, nombre:'Completa · 63 col.' }, { cols:94, nombre:'Extra larga · 94 col.' }
 ];
-const L = { cols:30, n:1, W:90, D:56 };
-function setLayout(b) { L.cols = b.cols; L.n = b.n; L.W = (b.cols - 1) * PITCH + 16.34; L.D = BOARD_D * b.n; }
-function boardZ(bd) { return (bd - (L.n - 1) / 2) * BOARD_D; }
-function holeXZ(bd, row, col) { return { x:(col - (L.cols - 1) / 2) * PITCH, z:ROW_Z[row] + boardZ(bd) }; }
+const L = { cols:30, n:1, W:90, D:56, ox:0, oz:0 };
+function setLayout(b) { L.cols = b.cols; L.n = b.n; L.W = (b.cols - 1) * PITCH + 16.34; L.D = BOARD_D * b.n; L.ox = +b.ox || 0; L.oz = +b.oz || 0; }
+function boardZ(bd) { return (bd - (L.n - 1) / 2) * BOARD_D + L.oz; }
+function holeXZ(bd, row, col) { return { x:(col - (L.cols - 1) / 2) * PITCH + L.ox, z:ROW_Z[row] + boardZ(bd) }; }
 function stripOf(bd, row, col) {
   const r = row.charAt(0);
   if (r === 'N' || r === 'P') return 'R:' + bd + ':' + row;
@@ -1906,7 +1920,7 @@ function canPlaceBench(project, c) {
   if (c.mount) return project.components.some(o => o.id === c.mount);
   const Hc = benchHalf(c);
   if (Math.abs(c.x) > TABLE.hx - Hc.hw || Math.abs(c.z) > TABLE.hz - Hc.hd) return false;
-  if (Math.abs(c.x) < L.W / 2 + Hc.hw + 6 && Math.abs(c.z) < L.D / 2 + Hc.hd + 6) return false;
+  if (Math.abs(c.x - L.ox) < L.W / 2 + Hc.hw + 6 && Math.abs(c.z - L.oz) < L.D / 2 + Hc.hd + 6) return false;
   return !project.components.some(o => {
     if (o.id === c.id || o.mount || PARTS[o.type].kind !== 'bench') return false;
     const Ho = benchHalf(o);
@@ -1917,8 +1931,8 @@ function canPlace(project, c) { return PARTS[c.type].kind === 'bench' ? canPlace
 function holeFree(project, bd, row, col) { return !occupiedHoles(project).has(holeKey(bd, row, col)); }
 function findBenchSpot(project, c) {
   const P = PARTS[c.type], home = BENCH_HOME[c.type] || { x:0, z:-90 };
-  const zs = [], back = -(L.D / 2 + P.d / 2 + 26);
-  for (let k = 0; k < 6; k++) zs.push(back - k * 70, -back + k * 70);
+  const zs = [], back = L.oz - (L.D / 2 + P.d / 2 + 26), front = L.oz + (L.D / 2 + P.d / 2 + 26);
+  for (let k = 0; k < 6; k++) zs.push(back - k * 70, front + k * 70);
   const tries = [[home.x, Math.min(home.z, back)]];
   zs.forEach(z => { for (let s = 0; s <= 420; s += 10) { tries.push([home.x + s, z]); if (s) tries.push([home.x - s, z]); } });
   for (const t of tries) { c.x = t[0]; c.z = t[1]; if (canPlaceBench(project, c)) return true; }
@@ -7777,7 +7791,7 @@ function setRay(e) {
 }
 function planePoint(pl) { const v = new THREE.Vector3(); return ray.ray.intersectPlane(pl, v) ? v : null; }
 function nearestHole(x, z, tol) {
-  const col0 = Math.round(x / Lab.PITCH + (Lab.L.cols - 1) / 2);
+  const col0 = Math.round((x - Lab.L.ox) / Lab.PITCH + (Lab.L.cols - 1) / 2);
   if (col0 < 0 || col0 > Lab.L.cols - 1) return null;
   let best = null, bd2 = 1e9;
   for (let bd = 0; bd < Lab.L.n; bd++) Lab.ROWS.forEach(r => {
@@ -7812,9 +7826,9 @@ function snapComp(c, p) {
   }
   const span = Lab.compSpan(c);
   if (P.dip) {
-    const bd = clamp(Math.round(p.z / Lab.BOARD_D + (Lab.L.n - 1) / 2), 0, Lab.L.n - 1);
+    const bd = clamp(Math.round((p.z - Lab.L.oz) / Lab.BOARD_D + (Lab.L.n - 1) / 2), 0, Lab.L.n - 1);
     if (Math.abs(p.z - Lab.boardZ(bd)) > 14) return false;
-    c.bd = bd; c.row = 'e'; c.col = Math.round(p.x / Lab.PITCH + (Lab.L.cols - 1) / 2 - span / 2);
+    c.bd = bd; c.row = 'e'; c.col = Math.round((p.x - Lab.L.ox) / Lab.PITCH + (Lab.L.cols - 1) / 2 - span / 2);
     return Lab.canPlace(S.project, c);
   }
   const h = nearestHole(p.x - span * Lab.PITCH / 2, p.z, 6);
@@ -7848,6 +7862,8 @@ function sanitize(obj) {
   const p = Lab.newProject();
   const b = obj.board || {};
   p.board = { cols: Lab.BOARD_SIZES.some(s => s.cols === b.cols) ? b.cols : 30, n: clamp(int(b.n, 1), 1, 3) };
+  if (num(b.ox, 0)) p.board.ox = clamp(num(b.ox, 0), -700, 700);
+  if (num(b.oz, 0)) p.board.oz = clamp(num(b.oz, 0), -700, 700);
   p.seq = Math.max(1, int(obj.seq, 1000));
   if (obj.counts && typeof obj.counts === 'object') Object.keys(obj.counts).slice(0, 30).forEach(k => { p.counts[String(k).slice(0, 6)] = clamp(int(obj.counts[k], 0), 0, 9999); });
   const near = (list, v) => list.reduce((a, x) => Math.abs(Math.log(x / v)) < Math.abs(Math.log(a / v)) ? x : a, list[0]);
@@ -9440,6 +9456,8 @@ function flyTo(pos, tgt) { S.fly = { from: camera.position.clone(), to: V3(pos[0
 function flyPreset(name) {
   const pr = PRESETS[CAM.mode][name]; if (!pr) return;
   const v = pr[1](), k = CAM.mode === 'bench' ? Math.max(1, 1.5 / camera.aspect) : 1;
+  /* las vistas de protoboard se centran donde esté la placa */
+  if (CAM.mode === 'proto') { const o = [Lab.L.ox || 0, 0, Lab.L.oz || 0]; v.pos = v.pos.map((x, i) => x + o[i]); v.tgt = v.tgt.map((x, i) => x + o[i]); }
   flyTo(v.pos.map((x, i) => v.tgt[i] + (x - v.tgt[i]) * k), v.tgt);
 }
 function setViewMode(m, silent) {
@@ -9470,7 +9488,8 @@ function focusSelected() {
 }
 function clampTarget() {
   const t = controls.target, b = CAM.mode === 'proto' ? { x: Lab.L.W / 2, z: Lab.L.D / 2, y0: 0, y1: 10 } : { x: Lab.TABLE.hx, z: Lab.TABLE.hz, y0: TABLE_Y, y1: 90 };
-  const nx = clamp(t.x, -b.x, b.x), ny = clamp(t.y, b.y0, b.y1), nz = clamp(t.z, -b.z, b.z);
+  const cx = CAM.mode === 'proto' ? Lab.L.ox : 0, cz = CAM.mode === 'proto' ? Lab.L.oz : 0;
+  const nx = clamp(t.x, cx - b.x, cx + b.x), ny = clamp(t.y, b.y0, b.y1), nz = clamp(t.z, cz - b.z, cz + b.z);
   if (nx !== t.x || ny !== t.y || nz !== t.z) { camera.position.x += nx - t.x; camera.position.y += ny - t.y; camera.position.z += nz - t.z; t.set(nx, ny, nz); }
 }
 function walk(dt) {
@@ -14747,6 +14766,416 @@ function showMoveTip(ctl, x, y) {
   tip.innerHTML = esc(ctl.c.name) + ' · <em>arrastra para mover la pieza</em>';
   tip.hidden = false; tip.style.left = Math.min(x - r.left + 14, r.width - tip.offsetWidth - 8) + 'px'; tip.style.top = (y - r.top + 16) + 'px';
 }
+
+/* ================= v26 · selección múltiple, copiar y pegar, mover bloques y mover la protoboard ================= */
+/* MS.ids: piezas seleccionadas · MS.wires: cable → extremos que acompañan al bloque ('ab' entero, 'a' o 'b' solo ese extremo) */
+const MS = { ids: new Set(), wires: new Map(), fx: new THREE.Group(), ghost: new THREE.Group(), clip: null, op: null, keep: false };
+scene.add(MS.fx); scene.add(MS.ghost);
+try { const t = localStorage.getItem('vectralab_clip'); if (t) MS.clip = JSON.parse(t); } catch (e) { /* sin almacenamiento */ }
+const deep = o => JSON.parse(JSON.stringify(o));
+const snap5 = v => Math.round(v / 5) * 5;
+const accentColor = () => new THREE.Color((getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#2557b8').trim());
+const msAny = () => MS.ids.size > 0 || MS.wires.size > 0;
+const msFull = () => MS.ids.size + [...MS.wires.values()].filter(v => v === 'ab').length;
+
+/* ---------- recuadros de la selección ---------- */
+function msFx(color) {
+  MS.fx.position.set(0, 0, 0);
+  MS.fx.children.slice().forEach(h => { MS.fx.remove(h); if (h.geometry) h.geometry.dispose(); if (h.material) h.material.dispose(); });
+  const cl = color || accentColor();
+  const add = obj => {
+    if (!obj) return; const b = new THREE.Box3().setFromObject(obj); if (b.isEmpty()) return;
+    b.expandByScalar(0.8); const h = new THREE.Box3Helper(b, cl); h.material.depthTest = false; h.material.transparent = true; h.material.opacity = 0.9; h.renderOrder = 30; MS.fx.add(h);
+  };
+  MS.ids.forEach(id => { const o = compObjs.get(id); if (o) add(o.group); });
+  MS.wires.forEach((v, id) => { if (v === 'ab') { const o = wireObjs.get(id); if (o) add(o.group); } });
+  syncMsBar();
+}
+function msTint(ok) { const cl = ok ? accentColor() : new THREE.Color(0xff4a3a); MS.fx.children.forEach(h => h.material.color.copy(cl)); }
+function msClear(silent) { MS.ids.clear(); MS.wires.clear(); if (!silent) msFx(); }
+
+/* la selección simple de siempre convive con la múltiple: elegir algo suelto vacía el grupo */
+const selectItem25 = selectItem;
+selectItem = function (sel) { if (!MS.keep && msAny()) msClear(); selectItem25(sel); syncMsBar(); };
+const rebuildScene25 = rebuildScene;
+rebuildScene = function () {
+  rebuildScene25();
+  const ids = new Set(S.project.components.map(c => c.id)), wids = new Set(S.project.wires.map(w => w.id));
+  [...MS.ids].forEach(id => { if (!ids.has(id)) MS.ids.delete(id); });
+  [...MS.wires.keys()].forEach(id => { if (!wids.has(id)) MS.wires.delete(id); });
+  msFx(); placeHandle();
+};
+
+/* ---------- utilidades de geometría ---------- */
+function toScreen(v) { const p = v.clone().project(camera), r = canvas.getBoundingClientRect(); return { x: r.left + (p.x + 1) / 2 * r.width, y: r.top + (1 - p.y) / 2 * r.height, front: p.z < 1 }; }
+function epV(ep) { const t = epWorld(ep); return V3(t.x, t.y, t.z); }
+/* agujero (sin limitar a la placa) bajo un punto de la mesa */
+function gridAt(p) { return { col: Math.round((p.x - Lab.L.ox) / Lab.PITCH + (Lab.L.cols - 1) / 2), bd: Math.round((p.z - Lab.L.oz) / Lab.BOARD_D + (Lab.L.n - 1) / 2) }; }
+
+/* desplaza piezas y extremos de cable dentro de un proyecto (copia de trabajo) */
+function shiftProject(p, ids, wires, d) {
+  p.components.forEach(c => {
+    if (!ids.has(c.id)) return;
+    if (PARTS[c.type].kind === 'board') { c.col += d.dc; c.bd = (c.bd || 0) + d.dbd; }
+    else if (!c.mount) { c.x = Math.round((c.x + d.dx) * 100) / 100; c.z = Math.round((c.z + d.dz) * 100) / 100; }
+  });
+  p.wires.forEach(w => { const v = wires.get(w.id); if (!v) return; ['a', 'b'].forEach(k => { if (v.includes(k) && w[k].k === 'h') { w[k].col += d.dc; w[k].bd = (w[k].bd || 0) + d.dbd; } }); });
+}
+/* ¿el proyecto es válido? cada pieza movida cabe y ningún agujero queda usado dos veces */
+function validProject(p, moved) {
+  const cols = Lab.L.cols, n = Lab.L.n, cnt = new Map(), bump = k => cnt.set(k, (cnt.get(k) || 0) + 1);
+  for (const c of p.components) {
+    if (PARTS[c.type].kind === 'board') { if (moved.has(c.id) && !Lab.canPlaceOnBoard(p, c)) return false; Lab.compPins(c).forEach(h => bump(Lab.holeKey(h.bd, h.row, h.col))); }
+    else if (moved.has(c.id) && !c.mount && !Lab.canPlaceBench(p, c)) return false;
+  }
+  for (const w of p.wires) for (const e of [w.a, w.b]) if (e.k === 'h') { const bd = e.bd || 0; if (e.col < 0 || e.col >= cols || bd < 0 || bd >= n) return false; bump(Lab.holeKey(bd, e.row, e.col)); }
+  for (const v of cnt.values()) if (v > 1) return false;
+  return true;
+}
+
+/* ---------- qué se copia: la selección múltiple o la pieza / el cable seleccionado ---------- */
+function msTake() {
+  if (msAny()) return { ids: new Set(MS.ids), wires: new Map(MS.wires) };
+  if (S.sel && S.sel.type === 'comp' && findComp(S.sel.id)) return { ids: new Set([S.sel.id]), wires: new Map() };
+  if (S.sel && S.sel.type === 'wire') return { ids: new Set(), wires: new Map([[S.sel.id, 'ab']]) };
+  return null;
+}
+function msCopy(quiet) {
+  const sel = msTake(); if (!sel) return false;
+  const comps = S.project.components.filter(c => sel.ids.has(c.id)).map(deep);
+  const wires = S.project.wires.filter(w => sel.wires.get(w.id) === 'ab' && [w.a, w.b].every(e => e.k === 'h' || sel.ids.has(e.comp))).map(deep);
+  if (!comps.length && !wires.length) return false;
+  /* referencia para pegar: el agujero de más a la izquierda (o el centro de las piezas de mesa) */
+  const holes = [];
+  comps.forEach(c => { if (PARTS[c.type].kind === 'board') holes.push({ col: c.col, bd: c.bd || 0 }); });
+  wires.forEach(w => [w.a, w.b].forEach(e => { if (e.k === 'h') holes.push({ col: e.col, bd: e.bd || 0 }); }));
+  let ref;
+  if (holes.length) { const h = holes.reduce((a, b) => (b.col < a.col ? b : a)); ref = { board: true, col: h.col, bd: h.bd }; }
+  else { const b = comps.filter(c => !c.mount); ref = { board: false, x: b.reduce((a, c) => a + c.x, 0) / (b.length || 1), z: b.reduce((a, c) => a + c.z, 0) / (b.length || 1) }; }
+  MS.clip = { comps, wires, ref };
+  try { localStorage.setItem('vectralab_clip', JSON.stringify(MS.clip)); } catch (e) { /* sin almacenamiento */ }
+  if (!quiet) toast('Copiado: ' + comps.length + (comps.length === 1 ? ' pieza' : ' piezas') + (wires.length ? ' y ' + wires.length + (wires.length === 1 ? ' cable' : ' cables') : '') + '. Ctrl+V para pegar.', 'info');
+  syncMsBar();
+  return true;
+}
+function msDelete(sel) {
+  sel = sel || msTake(); if (!sel) return;
+  pushUndo();
+  const p = S.project;
+  p.components = p.components.filter(c => !sel.ids.has(c.id));
+  p.wires = p.wires.filter(w => sel.wires.get(w.id) !== 'ab' && !(w.a.k === 't' && sel.ids.has(w.a.comp)) && !(w.b.k === 't' && sel.ids.has(w.b.comp)));
+  msClear(true); S.sel = null; commit();
+}
+function msAll() {
+  MS.keep = true; S.sel = null; MS.keep = false;
+  S.project.components.forEach(c => MS.ids.add(c.id)); S.project.wires.forEach(w => MS.wires.set(w.id, 'ab'));
+  renderInspector(); msFx();
+}
+
+/* ---------- pegar: vista previa que sigue al cursor y clic para colocar ---------- */
+function insertClip(p, clip, d) {
+  const map = new Map(), ids = new Set(), wires = new Map();
+  clip.comps.forEach(c0 => {
+    if (!PARTS[c0.type]) return;
+    const props = { flip: !!c0.flip, p: deep(c0.p || {}) };
+    if (PARTS[c0.type].kind === 'board') Object.assign(props, { bd: (c0.bd || 0) + d.dbd, row: c0.row, col: c0.col + d.dc });
+    else { Object.assign(props, { x: Math.round((c0.x + d.dx) * 100) / 100, z: Math.round((c0.z + d.dz) * 100) / 100 }); if (c0.rot) props.rot = c0.rot; }
+    const c = Lab.makeComp(p, c0.type, props); p.components.push(c); map.set(c0.id, c); ids.add(c.id);
+  });
+  /* un instrumento montado en un chasis copiado sigue montado en la copia */
+  clip.comps.forEach(c0 => { const c = map.get(c0.id); if (c && c0.mount && map.has(c0.mount)) { c.mount = map.get(c0.mount).id; c.slot = c0.slot; } });
+  clip.wires.forEach(w0 => {
+    const ep = e => e.k === 'h' ? { k: 'h', bd: (e.bd || 0) + d.dbd, row: e.row, col: e.col + d.dc } : map.has(e.comp) ? { k: 't', comp: map.get(e.comp).id, pin: e.pin } : null;
+    const a = ep(w0.a), b = ep(w0.b); if (!a || !b) return;
+    const w = Lab.addWire(p, a, b, w0.color); if (w0.style) w.style = w0.style; wires.set(w.id, 'ab');
+  });
+  return { ids, wires };
+}
+function pasteDelta(e) {
+  const clip = MS.clip; setRay(e);
+  if (clip.ref.board) { const p = planePoint(plane); if (!p) return null; const g = gridAt(p), dc = g.col - clip.ref.col, dbd = g.bd - clip.ref.bd; return { dc, dbd, dx: dc * Lab.PITCH, dz: dbd * Lab.BOARD_D }; }
+  const p = planePoint(tablePlane); if (!p) return null;
+  return { dc: 0, dbd: 0, dx: snap5(p.x - clip.ref.x), dz: snap5(p.z - clip.ref.z) };
+}
+function pasteGhost(d, ok) {
+  const G = MS.ghost; G.children.slice().forEach(m => { G.remove(m); if (m.geometry) m.geometry.dispose(); if (m.material) m.material.dispose(); });
+  const cl = ok ? 0x3fe39a : 0xff4a3a, clip = MS.clip, pos = new Map();
+  const plate = (w, dpt, x, y, z) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, dpt), new THREE.MeshBasicMaterial({ color: cl, transparent: true, opacity: 0.42, depthTest: false, side: THREE.DoubleSide })); m.rotation.x = -Math.PI / 2; m.position.set(x, y, z); m.renderOrder = 25; G.add(m); };
+  clip.comps.forEach(c0 => {
+    const P = PARTS[c0.type]; if (!P) return;
+    if (P.kind === 'board') {
+      const c = Object.assign({}, c0, { bd: (c0.bd || 0) + d.dbd, col: c0.col + d.dc }), span = Lab.compSpan(c), dd = P.dip && Lab.dipDef(c), rw = dd && (dd.rows || ['e', 'f']);
+      const h = P.dip ? { x: Lab.holeXZ(c.bd, 'e', c.col + span / 2).x, z: Lab.boardZ(c.bd) } : Lab.holeXZ(c.bd, c.row, c.col + span / 2);
+      plate(span * Lab.PITCH + 3.6, dd ? Lab.ROW_Z[rw[1]] - Lab.ROW_Z[rw[0]] + 3 : P.fz, h.x, 0.25, h.z); pos.set(c0.id, V3(h.x, 1.5, h.z));
+    } else { const x = c0.x + d.dx, z = c0.z + d.dz; plate(P.w + 6, P.d + 6, x, TABLE_Y + 0.2, z); pos.set(c0.id, V3(x, TABLE_Y + 2, z)); }
+  });
+  clip.wires.forEach(w0 => {
+    const ep = e => { if (e.k === 'h') { const h = Lab.holeXZ((e.bd || 0) + d.dbd, e.row, e.col + d.dc); return V3(h.x, 1.2, h.z); } return pos.get(e.comp) || null; };
+    const a = ep(w0.a), b = ep(w0.b); if (!a || !b) return;
+    const m = new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, V3((a.x + b.x) / 2, Math.max(a.y, b.y) + 6, (a.z + b.z) / 2), b]), new THREE.LineBasicMaterial({ color: cl, depthTest: false, transparent: true, opacity: 0.9 }));
+    m.renderOrder = 26; G.add(m);
+  });
+  G.visible = true;
+}
+function startPaste() {
+  if (!MS.clip || !(MS.clip.comps.length || MS.clip.wires.length)) { toast('No hay nada copiado todavía: selecciona piezas y pulsa Ctrl+C.', 'warn'); return; }
+  if (S.mode === 'cable') setMode('select');
+  MS.op = { kind: 'paste', d: null, ok: false };
+  canvas.style.cursor = 'copy'; syncMsBar(); updateHint();
+}
+function endPaste() { MS.op = null; MS.ghost.children.slice().forEach(m => { MS.ghost.remove(m); if (m.geometry) m.geometry.dispose(); if (m.material) m.material.dispose(); }); canvas.style.cursor = S.mode === 'cable' ? 'crosshair' : 'default'; syncMsBar(); updateHint(); }
+function pasteUpdate(e) {
+  const d = pasteDelta(e); if (!d) return;
+  const op = MS.op, key = [d.dc, d.dbd, d.dx, d.dz].join();
+  if (op.key === key) return;
+  op.key = key; op.d = d;
+  const clone = deep(S.project), r = insertClip(clone, MS.clip, d);
+  op.ok = validProject(clone, r.ids); pasteGhost(d, op.ok);
+}
+function pasteCommit(e) {
+  pasteUpdate(e); const op = MS.op;
+  if (!op.d) return;
+  if (!op.ok) { toast('No cabe ahí: alguna pieza o cable choca con lo que ya está en la placa, o queda fuera de ella.', 'warn'); return; }
+  pushUndo();
+  const r = insertClip(S.project, MS.clip, op.d);
+  msClear(true); r.ids.forEach(id => MS.ids.add(id)); r.wires.forEach((v, id) => MS.wires.set(id, v));
+  MS.keep = true; S.sel = null; MS.keep = false;
+  endPaste(); commit();
+  toast('Pegado: ' + r.ids.size + (r.ids.size === 1 ? ' pieza' : ' piezas') + (r.wires.size ? ' y ' + r.wires.size + (r.wires.size === 1 ? ' cable' : ' cables') : '') + '.', 'info');
+}
+
+/* ---------- arrastrar la selección como bloque ---------- */
+function startBlock(e, hit) {
+  const sel = { ids: new Set(MS.ids), wires: new Map(MS.wires) };
+  const board = [...sel.ids].some(id => { const c = findComp(id); return c && PARTS[c.type].kind === 'board'; }) || [...sel.wires.keys()].length > 0;
+  setRay(e); const p0 = planePoint(board ? plane : tablePlane); if (!p0) return false;
+  const objs = [];
+  sel.ids.forEach(id => { const o = compObjs.get(id); if (o) objs.push([o.group, o.group.position.clone()]); });
+  const hidden = [];
+  S.project.wires.forEach(w => {
+    const o = wireObjs.get(w.id); if (!o) return;
+    const v = sel.wires.get(w.id), tA = w.a.k === 't' && sel.ids.has(w.a.comp), tB = w.b.k === 't' && sel.ids.has(w.b.comp);
+    const allA = tA || (v && v.includes('a')), allB = tB || (v && v.includes('b'));
+    if (allA && allB) objs.push([o.group, o.group.position.clone()]);
+    else if (allA || allB) { o.group.visible = false; hidden.push(o.group); }   /* se estira: se redibuja al soltar */
+  });
+  MS.op = { kind: 'block', sel, board, p0, g0: board ? gridAt(p0) : null, objs, hidden, d: { dc: 0, dbd: 0, dx: 0, dz: 0 }, ok: true, moved: false, x: e.clientX, y: e.clientY, hit };
+  controls.enabled = false;
+  return true;
+}
+function blockMove(e) {
+  const op = MS.op;
+  if (!op.moved) { if (Math.hypot(e.clientX - op.x, e.clientY - op.y) < 6) return; op.moved = true; canvas.style.cursor = 'grabbing'; }
+  setRay(e); const p = planePoint(op.board ? plane : tablePlane); if (!p) return;
+  let d;
+  if (op.board) { const g = gridAt(p), dc = g.col - op.g0.col, dbd = g.bd - op.g0.bd; d = { dc, dbd, dx: dc * Lab.PITCH, dz: dbd * Lab.BOARD_D }; }
+  else d = { dc: 0, dbd: 0, dx: snap5(p.x - op.p0.x), dz: snap5(p.z - op.p0.z) };
+  if (d.dc === op.d.dc && d.dbd === op.d.dbd && d.dx === op.d.dx && d.dz === op.d.dz) return;
+  op.d = d;
+  op.objs.forEach(([g, base]) => g.position.set(base.x + d.dx, base.y, base.z + d.dz));
+  MS.fx.position.set(d.dx, 0, d.dz);
+  const clone = deep(S.project); shiftProject(clone, op.sel.ids, op.sel.wires, d);
+  op.ok = validProject(clone, op.sel.ids); op.clone = clone; msTint(op.ok);
+}
+function blockEnd() {
+  const op = MS.op; MS.op = null; controls.enabled = true; canvas.style.cursor = S.mode === 'cable' ? 'crosshair' : 'default';
+  op.hidden.forEach(g => { g.visible = true; });
+  if (!op.moved) {   /* clic sin arrastrar sobre una pieza del grupo: queda solo esa */
+    msClear(true); MS.fx.position.set(0, 0, 0); selectItem(op.hit); msFx(); return;
+  }
+  const zero = !op.d.dc && !op.d.dbd && !op.d.dx && !op.d.dz;
+  if (zero || !op.ok) { op.objs.forEach(([g, base]) => g.position.copy(base)); MS.fx.position.set(0, 0, 0); msFx(); if (!zero) { commit(); toast('No se puede soltar ahí: el bloque choca con otras piezas o cables, o queda fuera de la placa.', 'warn'); } return; }
+  pushUndo(); S.project = op.clone; commit();
+}
+
+/* ---------- recuadro de selección ---------- */
+function startMarquee(e) {
+  const r = stage.getBoundingClientRect(); let box = $('#marq');
+  if (!box) { box = document.createElement('div'); box.id = 'marq'; stage.appendChild(box); }
+  MS.op = { kind: 'marq', x0: e.clientX, y0: e.clientY, add: e.ctrlKey || e.metaKey, r };
+  box.hidden = false; box.style.left = (e.clientX - r.left) + 'px'; box.style.top = (e.clientY - r.top) + 'px'; box.style.width = '0px'; box.style.height = '0px';
+  controls.enabled = false;
+}
+function marqMove(e) {
+  const op = MS.op, r = op.r, box = $('#marq');
+  box.style.left = (Math.min(op.x0, e.clientX) - r.left) + 'px'; box.style.top = (Math.min(op.y0, e.clientY) - r.top) + 'px';
+  box.style.width = Math.abs(e.clientX - op.x0) + 'px'; box.style.height = Math.abs(e.clientY - op.y0) + 'px';
+  op.x1 = e.clientX; op.y1 = e.clientY;
+}
+function marqEnd() {
+  const op = MS.op; MS.op = null; controls.enabled = true; $('#marq').hidden = true;
+  if (op.x1 === undefined || Math.hypot(op.x1 - op.x0, op.y1 - op.y0) < 4) { if (!op.add) { msClear(); selectItem(null); } return; }
+  const x0 = Math.min(op.x0, op.x1), x1 = Math.max(op.x0, op.x1), y0 = Math.min(op.y0, op.y1), y1 = Math.max(op.y0, op.y1);
+  const inR = s => s.front && s.x >= x0 && s.x <= x1 && s.y >= y0 && s.y <= y1;
+  if (!op.add) msClear(true);
+  S.project.components.forEach(c => { if (c.mount) return; const o = compObjs.get(c.id); if (inR(toScreen(o ? o.group.getWorldPosition(V3(0, 0, 0)) : compPosition(c)))) MS.ids.add(c.id); });
+  S.project.wires.forEach(w => {
+    const A = inR(toScreen(epV(w.a))) || (w.a.k === 't' && MS.ids.has(w.a.comp)), B = inR(toScreen(epV(w.b))) || (w.b.k === 't' && MS.ids.has(w.b.comp));
+    if (A && B) MS.wires.set(w.id, 'ab'); else if (A && w.a.k === 'h') MS.wires.set(w.id, 'a'); else if (B && w.b.k === 'h') MS.wires.set(w.id, 'b');
+  });
+  /* solo extremos sueltos de cables, sin piezas ni cables enteros: no hay nada que mover ni copiar */
+  if (!msFull()) MS.wires.clear();
+  MS.keep = true; S.sel = null; renderInspector(); MS.keep = false;
+  msFx();
+  if (msFull()) toast(msFull() + ' elementos seleccionados. Arrástralos para moverlos o usa Ctrl+C / Ctrl+V.', 'info');
+}
+
+/* ---------- mover la protoboard por su asa ---------- */
+const HANDLE = { mesh: null };
+function placeHandle() {
+  if (!HANDLE.mesh) {
+    const cv = document.createElement('canvas'); cv.width = 64; cv.height = 256; const g = cv.getContext('2d');
+    g.fillStyle = '#2a2e34'; g.fillRect(0, 0, 64, 256); g.fillStyle = '#8a929c';
+    for (let y = 28; y < 236; y += 22) for (const x of [22, 42]) { g.beginPath(); g.arc(x, y, 4.2, 0, Math.PI * 2); g.fill(); }
+    const tex = new THREE.CanvasTexture(cv);
+    const side = new THREE.MeshStandardMaterial({ color: 0x2a2e34, roughness: 0.7 }), top = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.65 });
+    HANDLE.mesh = new THREE.Mesh(new THREE.BoxGeometry(7, 3.2, 28), [side, side, top, side, side, side]);
+    HANDLE.mesh.castShadow = true; scene.add(HANDLE.mesh);
+  }
+  HANDLE.mesh.position.set(Lab.L.ox - Lab.L.W / 2 - 3.8, -2.6, Lab.L.oz);
+  HANDLE.mesh.material.forEach(m => m.emissive && m.emissive.set(0x000000));
+}
+function boardFits(b) {
+  Lab.setLayout(b);
+  let ok = Math.abs(Lab.L.ox) + Lab.L.W / 2 <= Lab.TABLE.hx - 6 && Math.abs(Lab.L.oz) + Lab.L.D / 2 <= Lab.TABLE.hz - 6;
+  if (ok) ok = S.project.components.every(c => PARTS[c.type].kind !== 'bench' || c.mount || Lab.canPlaceBench(S.project, c));
+  Lab.setLayout(S.project.board);
+  return ok;
+}
+function startBoardDrag(e) {
+  setRay(e); const p0 = planePoint(plane); if (!p0) return;
+  const objs = [[boardGroup, boardGroup.position.clone()], [HANDLE.mesh, HANDLE.mesh.position.clone()]], hidden = [];
+  S.project.components.forEach(c => { if (PARTS[c.type].kind === 'board') { const o = compObjs.get(c.id); if (o) objs.push([o.group, o.group.position.clone()]); } });
+  S.project.wires.forEach(w => { const o = wireObjs.get(w.id); if (!o) return; if (w.a.k === 'h' && w.b.k === 'h') objs.push([o.group, o.group.position.clone()]); else if (w.a.k === 'h' || w.b.k === 'h') { o.group.visible = false; hidden.push(o.group); } });
+  MS.op = { kind: 'board', p0, ox0: Lab.L.ox, oz0: Lab.L.oz, objs, hidden, dx: 0, dz: 0, ok: true };
+  controls.enabled = false; canvas.style.cursor = 'grabbing'; MS.fx.visible = false;
+}
+function boardMove(e) {
+  const op = MS.op; setRay(e); const p = planePoint(plane); if (!p) return;
+  const dx = snap5(p.x - op.p0.x), dz = snap5(p.z - op.p0.z); if (dx === op.dx && dz === op.dz) return;
+  op.dx = dx; op.dz = dz;
+  op.objs.forEach(([g, base]) => g.position.set(base.x + dx, base.y, base.z + dz));
+  op.ok = boardFits(Object.assign({}, S.project.board, { ox: op.ox0 + dx, oz: op.oz0 + dz }));
+  HANDLE.mesh.material.forEach(m => m.emissive && m.emissive.set(op.ok ? 0x0b2a5c : 0x6a1410));
+  const tip = $('#tip'), r = stage.getBoundingClientRect();
+  tip.innerHTML = op.ok ? 'Protoboard · <em>suelta para dejarla aquí</em>' : 'Protoboard · <em>no cabe: choca con un instrumento o sale de la mesa</em>';
+  tip.hidden = false; tip.style.left = (e.clientX - r.left + 14) + 'px'; tip.style.top = (e.clientY - r.top + 16) + 'px';
+}
+function boardEnd() {
+  const op = MS.op; MS.op = null; controls.enabled = true; canvas.style.cursor = 'default'; $('#tip').hidden = true; MS.fx.visible = true;
+  op.hidden.forEach(g => { g.visible = true; });
+  op.objs.forEach(([g, base]) => g.position.copy(base));
+  if (!op.dx && !op.dz) { placeHandle(); return; }
+  if (!op.ok) { placeHandle(); toast('La protoboard no cabe ahí: choca con un instrumento de la mesa o se sale del borde.', 'warn'); return; }
+  pushUndo(); S.project.board.ox = op.ox0 + op.dx; S.project.board.oz = op.oz0 + op.dz;
+  if (!S.project.board.ox) delete S.project.board.ox; if (!S.project.board.oz) delete S.project.board.oz;
+  commit();
+}
+/* el tamaño o el número de placas cambia: la posición se conserva */
+const ensureBoards25 = ensureBoards;
+ensureBoards = function () {
+  const r = ensureBoards25();
+  boardGroup.position.set(0, 0, 0);
+  boardGroup.children.forEach((m, bd) => m.position.set(Lab.L.ox, -4, Lab.boardZ(bd)));
+  placeHandle();
+  return r;
+};
+
+/* ---------- eventos ---------- */
+document.addEventListener('pointerdown', e => {
+  if (e.target !== canvas || !e.isPrimary) return;
+  if (MS.op && MS.op.kind === 'paste') { e.preventDefault(); e.stopImmediatePropagation(); if (e.button === 2) endPaste(); else if (e.button === 0) pasteCommit(e); return; }
+  if (e.button > 0 || S.mode === 'cable' || S.drag || SPACE.held || PROBE.id || MS.op) return;
+  setRay(e);
+  if (HANDLE.mesh && ray.intersectObject(HANDLE.mesh, false).length) { e.stopImmediatePropagation(); startBoardDrag(e); return; }
+  const hit = pickObject(e), add = e.ctrlKey || e.metaKey;
+  if (hit && add) {   /* Ctrl+clic: agrega o quita del grupo */
+    e.stopImmediatePropagation();
+    if (S.sel && !msAny()) { if (S.sel.type === 'comp') MS.ids.add(S.sel.id); else MS.wires.set(S.sel.id, 'ab'); }
+    if (hit.type === 'comp') { if (MS.ids.has(hit.id)) MS.ids.delete(hit.id); else MS.ids.add(hit.id); }
+    else { if (MS.wires.get(hit.id) === 'ab') MS.wires.delete(hit.id); else MS.wires.set(hit.id, 'ab'); }
+    MS.keep = true; S.sel = null; renderInspector(); MS.keep = false; msFx(); return;
+  }
+  const inMs = hit && (hit.type === 'comp' ? MS.ids.has(hit.id) : MS.wires.get(hit.id) === 'ab');
+  if (inMs) { e.stopImmediatePropagation(); startBlock(e, hit); return; }
+  if (S.mode === 'area') {
+    e.stopImmediatePropagation();
+    if (hit) { msClear(true); if (hit.type === 'comp') MS.ids.add(hit.id); else MS.wires.set(hit.id, 'ab'); MS.keep = true; S.sel = null; renderInspector(); MS.keep = false; msFx(); startBlock(e, hit); }
+    else startMarquee(e);
+    return;
+  }
+  if (!hit && e.shiftKey) { e.stopImmediatePropagation(); startMarquee(e); }
+}, true);
+window.addEventListener('pointermove', e => {
+  const op = MS.op;
+  if (op) {
+    if (op.kind === 'paste') { if (e.target === canvas) pasteUpdate(e); return; }
+    if (op.kind === 'marq') marqMove(e); else if (op.kind === 'block') blockMove(e); else if (op.kind === 'board') boardMove(e);
+    return;
+  }
+  /* el asa de la protoboard avisa al pasar el ratón */
+  if (e.target !== canvas || e.buttons || S.drag || S.mode === 'cable' || !HANDLE.mesh) return;
+  setRay(e);
+  const on = ray.intersectObject(HANDLE.mesh, false).length > 0;
+  HANDLE.mesh.material.forEach(m => m.emissive && m.emissive.set(on ? 0x0b2a5c : 0x000000));
+  if (on) { canvas.style.cursor = 'grab'; const tip = $('#tip'), r = stage.getBoundingClientRect(); tip.innerHTML = 'Protoboard · <em>arrastra el asa para moverla</em>'; tip.hidden = false; tip.style.left = (e.clientX - r.left + 14) + 'px'; tip.style.top = (e.clientY - r.top + 16) + 'px'; }
+});
+window.addEventListener('pointerup', () => {
+  const op = MS.op; if (!op) return;
+  if (op.kind === 'marq') marqEnd(); else if (op.kind === 'block') blockEnd(); else if (op.kind === 'board') boardEnd();
+});
+canvas.addEventListener('contextmenu', e => { if (MS.op && MS.op.kind === 'paste') { e.preventDefault(); endPaste(); } });
+window.addEventListener('keydown', e => {
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable) return;
+  const k = e.key.toLowerCase(), mod = e.ctrlKey || e.metaKey;
+  const stop = () => { e.preventDefault(); e.stopImmediatePropagation(); };
+  if (k === 'escape' && MS.op && MS.op.kind === 'paste') { stop(); endPaste(); return; }
+  if (mod && !e.shiftKey && !e.altKey) {
+    const textSel = String(window.getSelection ? window.getSelection() : '').length > 0;
+    if (k === 'c' && !textSel) { if (msCopy()) stop(); return; }
+    if (k === 'x' && !textSel) { const sel = msTake(); if (sel && msCopy(true)) { stop(); msDelete(sel); toast('Cortado: Ctrl+V para pegarlo donde quieras.', 'info'); } return; }
+    if (k === 'v') { stop(); startPaste(); return; }
+    if (k === 'd') { stop(); if (msCopy(true)) startPaste(); return; }
+    if (k === 'a') { stop(); msAll(); return; }
+    return;
+  }
+  if (mod || e.altKey) return;
+  if ((k === 'delete' || k === 'backspace') && msAny()) { stop(); msDelete(); return; }
+  if (k === 'm') { stop(); setMode(S.mode === 'area' ? 'select' : 'area'); return; }
+  if (k === 'escape' && msAny()) msClear();
+}, true);
+
+/* ---------- modo selección y barra de acciones ---------- */
+const setMode25 = setMode;
+setMode = function (m) { if (MS.op && MS.op.kind === 'paste') endPaste(); setMode25(m); if (m === 'area') canvas.style.cursor = 'crosshair'; syncMsBar(); };
+const updateHint25 = updateHint;
+updateHint = function () {
+  updateHint25();
+  const h = $('#hint');
+  if (MS.op && MS.op.kind === 'paste') h.innerHTML = '<b>Pegar:</b> mueve el cursor sobre la protoboard (verde = cabe) y haz clic para colocar · Esc o clic derecho cancela';
+  else if (S.mode === 'area') h.innerHTML = '<b>Selección:</b> arrastra un recuadro para elegir varias piezas y cables · arrastra la selección para moverla · Ctrl+C / Ctrl+V copian y pegan · Supr borra';
+  else if (S.mode === 'select' && CAM.mode === 'proto') h.innerHTML = '<b>Protoboard:</b> abre Piezas en la barra lateral · Shift+arrastrar selecciona varias · el asa gris de la izquierda mueve la placa · rueda acerca · doble clic enfoca';
+};
+function syncMsBar() {
+  const bar = $('#msbar'); if (!bar) return;
+  const paste = MS.op && MS.op.kind === 'paste', n = msFull(), single = !msAny() && S.sel && (S.sel.type === 'comp' || S.sel.type === 'wire');
+  bar.hidden = !(paste || n || single);
+  bar.classList.toggle('pasting', !!paste);
+  const it = single ? (S.sel.type === 'wire' ? '1 cable' : (findComp(S.sel.id) || {}).name || '1 pieza') : n + (n === 1 ? ' elemento' : ' elementos');
+  $('#msbar-n').textContent = paste ? 'Pegando · haz clic donde quieras colocarlo' : it;
+  bar.querySelector('[data-ms="paste"]').disabled = !MS.clip;
+}
+$('#msbar').addEventListener('click', e => {
+  const b = e.target.closest('[data-ms]'); if (!b) return;
+  const a = b.dataset.ms;
+  if (a === 'copy') msCopy();
+  else if (a === 'dup') { if (msCopy(true)) startPaste(); }
+  else if (a === 'paste') { if (MS.op && MS.op.kind === 'paste') endPaste(); else startPaste(); }
+  else if (a === 'del') { if (msAny()) msDelete(); else deleteSelected(); }
+  else if (a === 'close') { if (MS.op && MS.op.kind === 'paste') endPaste(); msClear(); selectItem(null); }
+});
+syncMsBar();
 
 function frame(now) {
   requestAnimationFrame(frame);
